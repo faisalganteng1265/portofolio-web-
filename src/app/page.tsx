@@ -1,33 +1,10 @@
 import Image from "next/image";
 import NavBar from "./components/NavBar";
 import StackSection from "./components/StackSection";
+import ProjectsSection from "./components/ProjectsSection";
+import HeroWebGL from "./components/HeroWebGL";
+import BatikShaderBg from "./components/BatikShaderBg";
 
-const projects = [
-  {
-    title: "Batik Design System",
-    type: "UI Component Library",
-    text: "Koleksi komponen React dengan bahasa visual kawung, grid editorial, dan motion ringan yang terinspirasi batik klasik Jawa.",
-    image: "/assets/batik-kawung.jpg",
-    tags: ["React", "Tailwind", "Storybook"],
-    featured: true,
-  },
-  {
-    title: "JogjaTech Blog",
-    type: "Web Platform",
-    text: "Platform blog teknologi berbasis Next.js dengan MDX, dark mode, dan animasi scroll.",
-    image: "/assets/kraton-yogyakarta.jpg",
-    tags: ["Next.js", "MDX"],
-    featured: false,
-  },
-  {
-    title: "Candi Archive",
-    type: "Creative Web Experiment",
-    text: "One-page untuk menampilkan arsip budaya dengan parallax dan sticky panels.",
-    image: "/assets/borobudur-java.jpg",
-    tags: ["Next.js", "GSAP"],
-    featured: false,
-  },
-];
 
 const skillBento = [
   { label: "React",       span: "col-span-2", aksara: "ꦫ", desc: "Library UI utama" },
@@ -76,6 +53,9 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(16,13,10,0.97)_0%,rgba(16,13,10,0.85)_42%,rgba(16,13,10,0.38)_100%),radial-gradient(ellipse_at_72%_28%,rgba(214,164,75,0.18),transparent_40%),radial-gradient(circle_at_18%_80%,rgba(134,37,24,0.26),transparent_36%)]" />
         <div className="absolute inset-0 batik-overlay opacity-25" />
+
+        {/* WebGL: kawung particles + floating crystal */}
+        <HeroWebGL />
 
         {/* watermark aksara */}
         <p
@@ -294,90 +274,7 @@ export default function Home() {
       <StackSection />
 
       {/* ─── PROJECTS ─────────────────────────────────── */}
-      <section
-        id="karya"
-        className="relative overflow-hidden bg-[#15110f] px-5 py-20 md:px-8 lg:py-32"
-      >
-        <div className="absolute inset-0 tech-grid opacity-40" />
-
-        <div className="relative mx-auto max-w-7xl">
-          {/* header */}
-          <div className="reveal mb-12 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-                <span className="h-px w-6 bg-[#d6a44b]/60" />
-                Pilihan Karya
-              </p>
-              <h2 className="mt-4 text-[clamp(2rem,4vw,3.5rem)] font-black leading-[1.04]">
-                Visual kuat, tetap fungsional.
-              </h2>
-            </div>
-            <p className="max-w-[40ch] text-sm font-medium leading-7 text-[#9b8f7d] lg:text-right">
-              Proyek yang dibangun dengan perhatian penuh—dari struktur kode
-              sampai detail paling kecil di layar.
-            </p>
-          </div>
-
-          {/* bento grid */}
-          <div className="grid gap-3 md:grid-cols-5">
-            {/* featured big */}
-            <article className="group reveal relative overflow-hidden md:col-span-3">
-              <div className="relative overflow-hidden bg-[#100d0a]" style={{ aspectRatio: "16/10" }}>
-                <Image
-                  src={projects[0].image}
-                  alt={projects[0].title}
-                  fill
-                  sizes="(min-width: 768px) 60vw, 100vw"
-                  className="object-cover opacity-65 saturate-[0.7] transition duration-700 group-hover:scale-[1.04] group-hover:opacity-88 group-hover:saturate-100"
-                />
-                <ProjectOverlay project={projects[0]} index="01" />
-              </div>
-            </article>
-
-            {/* two stacked */}
-            <div className="flex flex-col gap-3 md:col-span-2">
-              {projects.slice(1).map((project, i) => (
-                <article
-                  key={project.title}
-                  className="group reveal relative overflow-hidden"
-                >
-                  <div className="relative overflow-hidden bg-[#100d0a]" style={{ aspectRatio: "4/3" }}>
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      sizes="(min-width: 768px) 36vw, 100vw"
-                      className="object-cover opacity-60 saturate-[0.65] transition duration-700 group-hover:scale-[1.06] group-hover:opacity-85 group-hover:saturate-100"
-                    />
-                    <ProjectOverlay
-                      project={project}
-                      index={`0${i + 2}`}
-                      compact
-                    />
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          {/* bottom strip */}
-          <div className="reveal mt-6 border border-[#f7efe0]/8 bg-[#18120e]/60 px-6 py-5 backdrop-blur md:flex md:items-center md:justify-between">
-            <p className="text-sm font-medium text-[#9b8f7d]">
-              Lebih banyak proyek sedang dikerjakan. Ikuti perkembangannya di
-              GitHub.
-            </p>
-            <a
-              className="mt-4 inline-flex items-center gap-2 border border-[#f7efe0]/14 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#f7efe0] transition-colors hover:border-[#d6a44b]/40 hover:text-[#d6a44b] md:mt-0"
-              href="https://github.com/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              GitHub
-              <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </div>
-      </section>
+      <ProjectsSection />
 
       {/* ─── SKILLS ───────────────────────────────────── */}
       <section className="relative px-5 py-20 md:px-8 lg:py-28">
@@ -499,6 +396,9 @@ export default function Home() {
         id="kontak"
         className="relative overflow-hidden border-t border-[#f7efe0]/8 bg-[#0d0b09] px-5 py-20 md:px-8 lg:py-28"
       >
+        {/* WebGL: animated batik GLSL shader background */}
+        <BatikShaderBg />
+
         <div
           className="pointer-events-none absolute right-[-4vw] top-1/2 -translate-y-1/2 select-none font-black leading-none text-[#a73522] opacity-[0.05]"
           style={{ fontSize: "clamp(14rem,28vw,32rem)" }}
@@ -599,45 +499,3 @@ export default function Home() {
   );
 }
 
-function ProjectOverlay({
-  project,
-  index,
-  compact = false,
-}: {
-  project: (typeof projects)[number];
-  index: string;
-  compact?: boolean;
-}) {
-  return (
-    <>
-      <div className="absolute inset-0 bg-gradient-to-t from-[#100d0a] via-[#100d0a]/15 to-transparent" />
-      <div className="absolute inset-0 border border-[#f7efe0]/8" />
-      {/* tag strip */}
-      {!compact && (
-        <div className="absolute right-4 top-4 flex gap-1.5">
-          {project.tags.map((tag) => (
-            <span
-              key={tag}
-              className="border border-[#f7efe0]/15 bg-[#100d0a]/70 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.18em] text-[#9b8f7d] backdrop-blur"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-      <div className="absolute bottom-0 left-0 p-5 md:p-7">
-        <span className="text-[9px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-          {index} · {project.type}
-        </span>
-        <h3 className="mt-1.5 text-xl font-black text-[#fff7ea] md:text-2xl">
-          {project.title}
-        </h3>
-        {!compact && (
-          <p className="mt-2 max-w-[40ch] text-sm font-medium leading-6 text-[#c9b99d]">
-            {project.text}
-          </p>
-        )}
-      </div>
-    </>
-  );
-}
