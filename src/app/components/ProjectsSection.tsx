@@ -13,7 +13,7 @@ const PAD_L    = 80;
 const PAD_R    = 120;
 
 // Y offset per card (vh from top) — zigzag atas-bawah dengan variasi
-const Y_VH = [8, 42, 12, 46, 6, 38, 16, 48, 10, 40, 18];
+const Y_VH = [8, 42, 12, 46, 6, 38, 16, 48, 10, 40, 18, 44, 8];
 
 
 export default function ProjectsSection() {

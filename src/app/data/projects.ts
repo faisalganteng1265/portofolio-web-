@@ -21,5 +21,7 @@ export const projectList: Project[] = [
   { num: "08", title: "Shield Yield",type: "Admin Panel",            tags: ["Next.js", "Tailwind", "Solidity", "Web3"],                       accent: "#a73522", featured: false, image: "/projects/shield.png",     href: "#" },
   { num: "09", title: "AI Campus",   type: "Audio Experiment",        tags: ["Next.js", "Tailwind", "Supabase", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/aicampus.png",     href: "#" },
   { num: "10", title: "Brainwave",   type: "Audio Experiment",        tags: ["Next.js", "Tailwind", "Supabase", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/kumon.png",     href: "#" },
-  { num: "11", title: "Batik AR Filter", type: "AR / WebXR",              tags: ["WebXR", "Spark AR"],                       accent: "#d6a44b", featured: false, image: "/assets/batik-ar.png",    href: "#" },
+  { num: "11", title: "growB",   type: "Audio Experiment",        tags: ["Next.js", "Tailwind", "Supabase", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/growb.png",     href: "#" },
+  { num: "12", title: "Sinauin",   type: "Audio Experiment",        tags: ["Next.js", "Tailwind", "Supabase", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/sinauin.jpeg",     href: "#" },
+  { num: "13", title: "growB",   type: "Audio Experiment",        tags: ["Next.js", "Tailwind", "Supabase", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/growb.png",     href: "#" },
 ];
