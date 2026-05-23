@@ -36,7 +36,11 @@ export default function NavBar() {
           <span className="grid h-9 w-9 place-items-center border border-[#d6a44b]/40 bg-[#2a1710] text-lg font-black text-[#d6a44b] transition-colors duration-200 group-hover:border-[#d6a44b]/80">
             ꦗ
           </span>
-          <span className="text-sm font-black uppercase tracking-[0.22em] text-[#f7efe0]">
+          <span
+            className={`text-sm font-black uppercase tracking-[0.22em] transition-colors ${
+              scrolled ? "text-[#f7efe0]" : "text-[#202719]"
+            }`}
+          >
             AFA
           </span>
         </a>
@@ -45,7 +49,11 @@ export default function NavBar() {
           {links.map((link) => (
             <a
               key={link.href}
-              className="nav-link text-[10px] font-black uppercase tracking-[0.24em] text-[#9b8f7d] hover:text-[#f7efe0]"
+              className={`nav-link text-[10px] font-black uppercase tracking-[0.24em] transition-colors ${
+                scrolled
+                  ? "text-[#9b8f7d] hover:text-[#f7efe0]"
+                  : "text-[#202719]/70 hover:text-[#202719]"
+              }`}
               href={link.href}
             >
               {link.label}
@@ -54,7 +62,11 @@ export default function NavBar() {
         </div>
 
         <a
-          className="hidden border border-[#d6a44b]/35 px-5 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#d6a44b] transition-all duration-200 hover:border-[#d6a44b] hover:bg-[#d6a44b]/10 md:block"
+          className={`hidden border px-5 py-2 text-[10px] font-black uppercase tracking-[0.22em] transition-all duration-200 md:block ${
+            scrolled
+              ? "border-[#d6a44b]/35 text-[#d6a44b] hover:border-[#d6a44b] hover:bg-[#d6a44b]/10"
+              : "border-[#202719]/45 bg-[#d6ff00] text-[#202719] hover:border-[#202719]"
+          }`}
           href="mailto:faisalakmal2105@gmail.com"
         >
           Hire Me
@@ -66,17 +78,23 @@ export default function NavBar() {
           aria-label={open ? "Tutup menu" : "Buka menu"}
         >
           <span
-            className={`block h-[1.5px] w-6 bg-[#f7efe0] transition-all duration-300 origin-center ${
+            className={`block h-[1.5px] w-6 transition-all duration-300 origin-center ${
+              scrolled || open ? "bg-[#f7efe0]" : "bg-[#202719]"
+            } ${
               open ? "translate-y-[6.5px] rotate-45" : ""
             }`}
           />
           <span
-            className={`block h-[1.5px] w-6 bg-[#f7efe0] transition-all duration-200 ${
+            className={`block h-[1.5px] w-6 transition-all duration-200 ${
+              scrolled || open ? "bg-[#f7efe0]" : "bg-[#202719]"
+            } ${
               open ? "opacity-0 scale-x-0" : ""
             }`}
           />
           <span
-            className={`block h-[1.5px] w-6 bg-[#f7efe0] transition-all duration-300 origin-center ${
+            className={`block h-[1.5px] w-6 transition-all duration-300 origin-center ${
+              scrolled || open ? "bg-[#f7efe0]" : "bg-[#202719]"
+            } ${
               open ? "-translate-y-[6.5px] -rotate-45" : ""
             }`}
           />

@@ -1,10 +1,7 @@
 import Image from "next/image";
-import NavBar from "./components/NavBar";
-import StackSection from "./components/StackSection";
 import ProjectsSection from "./components/ProjectsSection";
-import HeroWebGL from "./components/HeroWebGL";
 import BatikShaderBg from "./components/BatikShaderBg";
-
+import ScrollHero from "./components/ScrollHero";
 
 const skillBento = [
   { label: "React",       span: "col-span-2", aksara: "ꦫ", desc: "Library UI utama" },
@@ -19,145 +16,16 @@ const skillBento = [
   { label: "Performance", span: "col-span-1", aksara: "ꦱ", desc: "Web Vitals" },
 ];
 
-const tickerItems = [
-  "ꦲꦤꦕꦫꦏ",
-  "Batik Kawung",
-  "Pendopo Interface",
-  "Wayang Shadow",
-  "Scroll Stack",
-  "Sogan Palette",
-  "Next.js 16",
-  "React 19",
-  "TypeScript",
-  "Abiyyu Faisal Akmal",
-];
-
 export default function Home() {
   return (
     <main className="min-h-screen overflow-x-clip bg-[#100d0a] text-[#f7efe0]">
-      <NavBar />
-
       {/* ─── HERO ─────────────────────────────────────── */}
-      <section
-        id="home"
-        className="relative min-h-svh overflow-hidden px-5 pb-0 pt-24 md:px-8"
-      >
-        <Image
-          src="/assets/borobudur-java.jpg"
-          alt="Candi Borobudur"
-          fill
-          priority
-          sizes="100vw"
-          className="pointer-events-none object-cover opacity-55"
-          style={{ objectPosition: "58% 46%" }}
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(16,13,10,0.97)_0%,rgba(16,13,10,0.85)_42%,rgba(16,13,10,0.38)_100%),radial-gradient(ellipse_at_72%_28%,rgba(214,164,75,0.18),transparent_40%),radial-gradient(circle_at_18%_80%,rgba(134,37,24,0.26),transparent_36%)]" />
-        <div className="absolute inset-0 batik-overlay opacity-25" />
-
-        {/* WebGL: kawung particles + floating crystal */}
-        <HeroWebGL />
-
-        {/* watermark aksara */}
-        <p
-          className="pointer-events-none absolute right-[-2vw] top-1/2 -translate-y-1/2 select-none font-black leading-none text-[#f7efe0] opacity-[0.032]"
-          style={{ fontSize: "clamp(14rem,32vw,38rem)" }}
-          aria-hidden="true"
-        >
-          ꦗꦮ
-        </p>
-
-        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-6rem)] max-w-7xl flex-col justify-end pb-32">
-          {/* badge */}
-          <div className="mb-8 flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 border border-[#4caf50]/35 bg-[#4caf50]/8 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.26em] text-[#4caf50]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#4caf50] shadow-[0_0_6px_#4caf50]" />
-              Available for work
-            </span>
-          </div>
-
-          <h1 className="font-black leading-[0.88] tracking-tight text-[#fff7ea]">
-            <span
-              className="block"
-              style={{ fontSize: "clamp(3.5rem,11vw,10rem)" }}
-            >
-              Abiyyu
-            </span>
-            <span
-              className="block text-[#d6a44b]"
-              style={{ fontSize: "clamp(2rem,5.5vw,5rem)" }}
-            >
-              Faisal Akmal
-            </span>
-          </h1>
-
-          <div className="mt-6 flex flex-wrap items-end gap-8 lg:gap-16">
-            <div>
-              <p className="mb-1 text-[10px] font-black uppercase tracking-[0.28em] text-[#9b8f7d]">
-                ꦥꦺꦴꦂꦠꦺꦴꦥꦺꦴꦭꦶꦪꦺꦴ · Frontend Developer
-              </p>
-              <p className="max-w-[44ch] text-[0.98rem] font-medium leading-8 text-[#c9b99d]">
-                Saya membangun antarmuka web yang cepat, bersih, dan punya
-                karakter—dengan sentuhan budaya Nusantara sebagai identitas
-                visual yang bukan sekadar dekorasi.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <a
-                className="btn-shimmer bg-[#a73522] px-7 py-3.5 text-sm font-black text-white shadow-[0_16px_40px_rgba(167,53,34,0.38)]"
-                href="#karya"
-              >
-                Lihat Karya
-              </a>
-              <a
-                className="border border-[#f7efe0]/18 bg-[#f7efe0]/6 px-7 py-3.5 text-sm font-black text-[#f7efe0] backdrop-blur"
-                href="#kontak"
-              >
-                Hubungi Saya
-              </a>
-            </div>
-          </div>
-
-          {/* hero stats strip */}
-          <div className="mt-12 grid max-w-lg grid-cols-3 gap-px border border-[#f7efe0]/10 bg-[#f7efe0]/10">
-            {[
-              ["3+", "Proyek Selesai"],
-              ["2+", "Tahun Coding"],
-              ["100%", "Passion Lokal"],
-            ].map(([num, label]) => (
-              <div
-                key={label}
-                className="bg-[#100d0a]/80 px-5 py-4 backdrop-blur"
-              >
-                <p className="text-xl font-black text-[#d6a44b]">{num}</p>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b5f4f]">
-                  {label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ticker */}
-        <div className="absolute inset-x-0 bottom-0 z-20 overflow-hidden border-t border-[#f7efe0]/10 bg-[#0d0b09]/85 py-3.5 backdrop-blur">
-          <div className="marquee-track flex whitespace-nowrap">
-            {[0, 1].map((copy) => (
-              <div
-                key={copy}
-                className="flex shrink-0 items-center gap-12 px-8 text-[9px] font-black uppercase tracking-[0.26em] text-[#6b5f4f]"
-              >
-                {tickerItems.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ScrollHero />
 
       {/* ─── ABOUT ────────────────────────────────────── */}
       <section
         id="tentang"
-        className="relative overflow-hidden px-5 py-20 md:px-8 lg:py-32"
+        className="relative overflow-hidden bg-[#100d0a] px-5 py-20 md:px-8 lg:py-32"
       >
         <div className="pointer-events-none absolute -right-12 top-0 text-[20vw] font-black leading-none text-[#d6a44b] opacity-[0.028]" aria-hidden="true">
           ꦄ
@@ -269,9 +137,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ─── SCROLL STACK ─────────────────────────────── */}
-      <StackSection />
 
       {/* ─── PROJECTS ─────────────────────────────────── */}
       <ProjectsSection />
@@ -498,4 +363,3 @@ export default function Home() {
     </main>
   );
 }
-
