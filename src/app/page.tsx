@@ -2,6 +2,7 @@ import Image from "next/image";
 import ProjectsSection from "./components/ProjectsSection";
 import BatikShaderBg from "./components/BatikShaderBg";
 import ScrollHero from "./components/ScrollHero";
+import NameMark from "./components/NameMark";
 
 const skillBento = [
   { label: "React",       span: "col-span-2", aksara: "ꦫ", desc: "Library UI utama" },
@@ -19,6 +20,7 @@ const skillBento = [
 export default function Home() {
   return (
     <main className="min-h-screen overflow-x-clip bg-[#100d0a] text-[#f7efe0]">
+      <NameMark />
       {/* ─── HERO ─────────────────────────────────────── */}
       <ScrollHero />
 

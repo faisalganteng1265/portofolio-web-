@@ -6,7 +6,7 @@ import { projectList as projects } from "../data/projects";
 
 // ── layout constants ─────────────────────────────────────────────────────────
 const CARD_W   = 440;  // px  — landscape untuk screenshot landing page
-const CARD_H   = 275;  // px  — ~16:10 ratio
+const CARD_H   = 275;  // px
 const CARD_GAP = 32;   // px gap between cards
 const STEP     = CARD_W + CARD_GAP;
 const PAD_L    = 80;
