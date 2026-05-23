@@ -142,7 +142,7 @@ export default function Home() {
       <ProjectsSection />
 
       {/* ─── SKILLS ───────────────────────────────────── */}
-      <section className="relative bg-[#f5f0e8] px-5 py-20 md:px-8 lg:py-28">
+      <section className="sticky top-0 z-10 bg-[#f5f0e8] px-5 py-20 md:px-8 lg:py-28">
         <div className="pointer-events-none absolute left-0 top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-[#d6a44b]/30 to-transparent" />
 
         <div className="mx-auto max-w-7xl">
@@ -184,7 +184,7 @@ export default function Home() {
       </section>
 
       {/* ─── PROCESS ──────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-[#0e0c0a] px-5 py-20 md:px-8 lg:py-28">
+      <section className="relative z-20 min-h-screen overflow-hidden bg-[#0e0c0a] px-5 py-20 md:px-8 lg:py-28" style={{ boxShadow: "0 -12px 48px rgba(0,0,0,0.28)", borderRadius: "28px 28px 0 0" }}>
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
           {/* image */}
           <div className="reveal relative min-h-[380px] overflow-hidden border border-[#f7efe0]/8 lg:order-2">
@@ -259,7 +259,8 @@ export default function Home() {
       {/* ─── CONTACT ──────────────────────────────────── */}
       <section
         id="kontak"
-        className="relative overflow-hidden border-t border-[#f7efe0]/8 bg-[#0d0b09] px-5 py-20 md:px-8 lg:py-28"
+        className="relative z-30 min-h-screen overflow-hidden bg-[#0d0b09] px-5 py-20 md:px-8 lg:py-28"
+        style={{ boxShadow: "0 -12px 48px rgba(0,0,0,0.32)", borderRadius: "28px 28px 0 0" }}
       >
         {/* WebGL: animated batik GLSL shader background */}
         <BatikShaderBg />

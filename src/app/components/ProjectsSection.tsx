@@ -264,17 +264,17 @@ export default function ProjectsSection() {
       </div>
 
       {/* ── Bottom strip ── */}
-      <div className="border-t border-[#f7efe0]/8 bg-[#100d0a] px-8 py-10 md:flex md:items-center md:justify-between">
+      <div className="bg-[#f5f0e8] px-8 py-10 md:flex md:items-center md:justify-between">
         <div>
-          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#4b3f30]">
+          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#a73522]">
             ꦠꦩ꧀ꦧꦃꦭꦒꦶ · Masih ada lagi
           </p>
-          <p className="mt-1 text-sm font-medium text-[#9b8f7d]">
+          <p className="mt-1 text-sm font-medium text-[#7a6a58]">
             Lebih banyak proyek sedang dikerjakan.
           </p>
         </div>
         <a
-          className="mt-4 inline-flex items-center gap-2 border border-[#f7efe0]/14 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#f7efe0] transition-colors hover:border-[#d6a44b]/40 hover:text-[#d6a44b] md:mt-0"
+          className="mt-4 inline-flex items-center gap-2 border border-[#1a100a]/14 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#1a100a] transition-colors hover:border-[#d6a44b]/50 hover:text-[#d6a44b] md:mt-0"
           href="https://github.com/"
           target="_blank"
           rel="noreferrer"
