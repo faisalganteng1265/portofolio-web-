@@ -142,15 +142,15 @@ export default function Home() {
       <ProjectsSection />
 
       {/* ─── SKILLS ───────────────────────────────────── */}
-      <section className="relative bg-[#100d0a] px-5 py-20 md:px-8 lg:py-28">
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-[#d6a44b]/18 to-transparent" />
+      <section className="relative bg-[#f5f0e8] px-5 py-20 md:px-8 lg:py-28">
+        <div className="pointer-events-none absolute left-0 top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-[#d6a44b]/30 to-transparent" />
 
         <div className="mx-auto max-w-7xl">
-          <p className="reveal mb-3 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-            <span className="h-px w-6 bg-[#d6a44b]/60" />
+          <p className="reveal mb-3 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#a73522]">
+            <span className="h-px w-6 bg-[#a73522]/60" />
             Stack & Alat
           </p>
-          <h2 className="reveal mb-10 text-[clamp(2rem,4vw,3.2rem)] font-black leading-[1.04]">
+          <h2 className="reveal mb-10 text-[clamp(2rem,4vw,3.2rem)] font-black leading-[1.04] text-[#1a100a]">
             Teknologi yang saya pakai sehari-hari.
           </h2>
 
@@ -159,22 +159,22 @@ export default function Home() {
             {skillBento.map((skill, i) => (
               <div
                 key={skill.label}
-                className={`skill-card reveal group relative overflow-hidden border border-[#f7efe0]/8 bg-[#18120e] p-4 transition-all duration-300 hover:border-[#d6a44b]/30 hover:bg-[#221a12] ${
+                className={`skill-card reveal group relative overflow-hidden border border-[#1a100a]/10 bg-white p-4 transition-all duration-300 hover:border-[#d6a44b]/50 hover:bg-[#fdf8f2] ${
                   i % 5 === 0 ? "col-span-2" : ""
                 }`}
               >
                 {/* aksara bg */}
                 <p
-                  className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 select-none font-black leading-none text-[#d6a44b] opacity-[0.07] transition-opacity duration-300 group-hover:opacity-[0.13]"
+                  className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 select-none font-black leading-none text-[#d6a44b] opacity-[0.10] transition-opacity duration-300 group-hover:opacity-[0.18]"
                   style={{ fontSize: "4.5rem" }}
                   aria-hidden="true"
                 >
                   {skill.aksara}
                 </p>
-                <p className="relative text-sm font-black text-[#c9b99d] group-hover:text-[#fff7ea]">
+                <p className="relative text-sm font-black text-[#2a1a0e] group-hover:text-[#a73522]">
                   {skill.label}
                 </p>
-                <p className="relative mt-1 text-[9px] font-medium text-[#4b3f30]">
+                <p className="relative mt-1 text-[9px] font-medium text-[#7a6a58]">
                   {skill.desc}
                 </p>
               </div>
