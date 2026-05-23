@@ -142,7 +142,7 @@ export default function Home() {
       <ProjectsSection />
 
       {/* ─── SKILLS ───────────────────────────────────── */}
-      <section className="relative px-5 py-20 md:px-8 lg:py-28">
+      <section className="relative bg-[#100d0a] px-5 py-20 md:px-8 lg:py-28">
         <div className="pointer-events-none absolute left-0 top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-[#d6a44b]/18 to-transparent" />
 
         <div className="mx-auto max-w-7xl">

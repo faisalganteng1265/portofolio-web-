@@ -36,28 +36,16 @@ const PAD_R    = 120;
 // Y offset per card (vh from top) — zigzag atas-bawah dengan variasi
 const Y_VH = [6, 32, 10, 36, 4, 28, 14, 38, 8, 30, 16];
 
-function lerpColor(a: string, b: string, t: number) {
-  const h = (s: string) => [
-    parseInt(s.slice(1, 3), 16),
-    parseInt(s.slice(3, 5), 16),
-    parseInt(s.slice(5, 7), 16),
-  ];
-  const [ar, ag, ab] = h(a);
-  const [br, bg, bb] = h(b);
-  return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
-}
 
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef   = useRef<HTMLDivElement>(null);
-  const bgRef      = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const section  = sectionRef.current;
     const track    = trackRef.current;
-    const bgEl     = bgRef.current;
-    if (!section || !track || !bgEl) return;
+    if (!section || !track) return;
 
     const n = projects.length;
 
@@ -82,23 +70,27 @@ export default function ProjectsSection() {
         counterRef.current.textContent = String(cardIdx + 1).padStart(2, "0");
       }
 
-      // ── bg light/dark transition ──────────────────────────────────────────
-      const enterP = Math.max(0, Math.min(1, scrollInSection / (wh * 0.5)));
-      const exitP  = Math.max(0, Math.min(1, (scrollInSection - (totalSectionScroll - wh * 0.5)) / (wh * 0.5)));
-      const lightT = Math.max(0, enterP - exitP);
+      // ── bg: putih saat masuk section, tetap putih setelah selesai ──────────
+      const isLight = scrollInSection > wh * 0.15;
 
-      bgEl.style.backgroundColor = lerpColor("#0a0806", "#f5f0e8", lightT);
+      section.style.backgroundColor = isLight ? "#f5f0e8" : "#100d0a";
 
       const heading = section!.querySelector<HTMLElement>("[data-heading]");
       const sub     = section!.querySelector<HTMLElement>("[data-sub]");
-      if (heading) heading.style.color = lerpColor("#fff7ea", "#1a100a", lightT);
-      if (sub)     sub.style.color     = lerpColor("#4b3f30", "#7a6a58", lightT);
+      if (heading) {
+        heading.style.color      = isLight ? "#1a100a" : "#fff7ea";
+        heading.style.transition = "color 0.6s ease";
+      }
+      if (sub) {
+        sub.style.color      = isLight ? "#7a6a58" : "#4b3f30";
+        sub.style.transition = "color 0.6s ease";
+      }
 
-      // card shadow reacts to bg
       const cards = track.querySelectorAll<HTMLElement>("[data-card]");
       cards.forEach((card) => {
-        const shadowA = Math.round(0.35 + lightT * 0.25);
-        card.style.boxShadow = `0 12px 48px rgba(0,0,0,${shadowA})`;
+        card.style.boxShadow = isLight
+          ? "0 12px 56px rgba(0,0,0,0.22)"
+          : "0 12px 48px rgba(0,0,0,0.35)";
       });
     }
 
@@ -114,14 +106,14 @@ export default function ProjectsSection() {
   const trackWidth = PAD_L + projects.length * STEP + PAD_R;
 
   return (
-    <section ref={sectionRef} id="karya">
-
-      {/* bg colour layer */}
-      <div
-        ref={bgRef}
-        className="pointer-events-none fixed inset-0 -z-10"
-        style={{ backgroundColor: "#0a0806" }}
-      />
+    <section
+      ref={sectionRef}
+      id="karya"
+      style={{
+        backgroundColor: "#100d0a",
+        transition: "background-color 0.75s cubic-bezier(0.4,0,0.2,1)",
+      }}
+    >
 
       {/* ── Header ── */}
       <div className="px-5 pt-20 pb-10 md:px-10 lg:pt-24">
@@ -272,7 +264,7 @@ export default function ProjectsSection() {
       </div>
 
       {/* ── Bottom strip ── */}
-      <div className="border-t border-[#f7efe0]/8 bg-[#0a0806] px-8 py-10 md:flex md:items-center md:justify-between">
+      <div className="border-t border-[#f7efe0]/8 bg-[#100d0a] px-8 py-10 md:flex md:items-center md:justify-between">
         <div>
           <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#4b3f30]">
             ꦠꦩ꧀ꦧꦃꦭꦒꦶ · Masih ada lagi
