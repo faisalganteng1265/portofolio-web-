@@ -26,15 +26,15 @@ const projects = [
 ].map((p, i) => ({ ...p, image: IMAGES[i % IMAGES.length] }));
 
 // ── layout constants ─────────────────────────────────────────────────────────
-const CARD_W   = 300;  // px
-const CARD_H   = 420;  // px
-const CARD_GAP = 36;   // px gap between cards
+const CARD_W   = 440;  // px  — landscape untuk screenshot landing page
+const CARD_H   = 275;  // px  — ~16:10 ratio
+const CARD_GAP = 32;   // px gap between cards
 const STEP     = CARD_W + CARD_GAP;
 const PAD_L    = 80;
 const PAD_R    = 120;
 
 // Y offset per card (vh from top) — zigzag atas-bawah dengan variasi
-const Y_VH = [6, 32, 10, 36, 4, 28, 14, 38, 8, 30, 16];
+const Y_VH = [8, 42, 12, 46, 6, 38, 16, 48, 10, 40, 18];
 
 
 export default function ProjectsSection() {
@@ -157,7 +157,7 @@ export default function ProjectsSection() {
       </div>
 
       {/* ── Scroll-driven horizontal gallery ── */}
-      <div style={{ height: `${Math.max(300, projects.length * 65)}vh` }}>
+      <div style={{ height: `${Math.max(300, projects.length * 90)}vh` }}>
         <div className="sticky top-0 overflow-hidden" style={{ height: "100vh" }}>
           {/* horizontal track */}
           <div
