@@ -71,6 +71,11 @@ export default function ProjectsSection() {
           ? "0 12px 56px rgba(0,0,0,0.22)"
           : "0 12px 48px rgba(0,0,0,0.35)";
       });
+
+      // teks muncul saat scroll gallery mulai
+      const textPanels = track.querySelectorAll<HTMLElement>("[data-card-text]");
+      const textOpacity = progress > 0.02 ? 1 : 0;
+      textPanels.forEach((el) => { el.style.opacity = String(textOpacity); });
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -155,80 +160,88 @@ export default function ProjectsSection() {
               return (
                 <div
                   key={project.title}
-                  data-card
                   style={{
                     position: "absolute",
                     left: `${PAD_L + i * STEP}px`,
                     top: `${yVh}vh`,
-                    width: `${CARD_W}px`,
-                    height: `${CARD_H}px`,
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    boxShadow: "0 12px 48px rgba(0,0,0,0.35)",
                   }}
-                  className="group bg-[#130f0b]"
+                  className="group"
                 >
-                  {/* photo */}
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    sizes="440px"
-                    className="object-cover transition-all duration-500 group-hover:scale-[1.04]"
-                    priority={i < 3}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b08] via-[#0d0b08]/40 to-transparent" />
-                  <div className="absolute inset-0 batik-overlay opacity-[0.12]" />
-
-                  {/* featured badge */}
-                  {project.featured && (
-                    <div className="absolute left-4 top-4 border border-[#a73522]/50 bg-[#a73522]/15 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-[#a73522]">
-                      Featured
-                    </div>
-                  )}
-
-                  {/* num */}
-                  <div className="absolute right-4 top-4 text-right">
-                    <span className="text-[9px] font-black text-[#d6a44b]/50">{project.num}</span>
-                  </div>
-
-                  {/* content */}
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <span className="text-[8px] font-black uppercase tracking-[0.22em] text-[#d6a44b]">
-                      {project.type}
-                    </span>
-                    <h3
-                      className="mt-1.5 font-black leading-[1.05] text-[#fff7ea]"
-                      style={{ fontSize: "clamp(1rem,1.8vw,1.25rem)" }}
-                    >
-                      {project.title}
-                    </h3>
-
-                    {/* tags */}
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="border border-[#f7efe0]/8 bg-[#18120e]/80 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.14em] text-[#4b3f30]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* accent line */}
-                    <div
-                      className="mt-4 h-[1.5px] opacity-50"
-                      style={{ background: `linear-gradient(to right, ${project.accent}, transparent)` }}
+                  {/* card image */}
+                  <div
+                    data-card
+                    style={{
+                      width: `${CARD_W}px`,
+                      height: `${CARD_H}px`,
+                      borderRadius: "16px",
+                      overflow: "hidden",
+                      boxShadow: "0 12px 48px rgba(0,0,0,0.35)",
+                      position: "relative",
+                    }}
+                    className="bg-[#130f0b]"
+                  >
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      sizes="440px"
+                      className="object-cover transition-all duration-500 group-hover:scale-[1.04]"
+                      priority={i < 3}
                     />
-
-                    <a
-                      href={project.href ?? "#"}
-                      className="mt-3 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.18em] text-[#f7efe0]/30 transition-colors group-hover:text-[#d6a44b]"
-                    >
-                      Lihat <span aria-hidden="true">→</span>
-                    </a>
+                    {project.featured && (
+                      <div className="absolute left-4 top-4 border border-[#a73522]/50 bg-[#a73522]/15 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-[#a73522]">
+                        Featured
+                      </div>
+                    )}
                   </div>
+
+                  {/* ── teks di kanan card ── */}
+                <div
+                  data-card-text
+                  style={{
+                    position: "absolute",
+                    left: CARD_W + 24,
+                    top: 0,
+                    width: 220,
+                    height: CARD_H,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    gap: 8,
+                    opacity: 0,
+                    transition: "opacity 0.6s ease",
+                  }}
+                >
+                  <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#a73522]">
+                    {project.num}
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#d6a44b]">
+                    {project.type}
+                  </span>
+                  <h3 className="font-black leading-[1.1] text-[#1a100a]" style={{ fontSize: "1.25rem" }}>
+                    {project.title}
+                  </h3>
+                  <div
+                    className="h-px w-10 opacity-40"
+                    style={{ background: project.accent }}
+                  />
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[9px] font-black uppercase tracking-[0.12em] text-[#7a6a58]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <a
+                    href={project.href ?? "#"}
+                    className="mt-1 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#1a100a]/30 transition-colors hover:text-[#d6a44b]"
+                  >
+                    Lihat <span aria-hidden="true">→</span>
+                  </a>
+                </div>
                 </div>
               );
             })}
