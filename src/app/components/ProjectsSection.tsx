@@ -2,28 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-
-// ── ganti / tambah project sesuai data asli ─────────────────────────────────
-const IMAGES = [
-  "/assets/batik-kawung.jpg",
-  "/assets/kraton-yogyakarta.jpg",
-  "/assets/borobudur-java.jpg",
-  "/assets/wayang-kulit.jpg",
-];
-
-const projects = [
-  { num: "01", title: "Batik Design System",   type: "UI Library",          tags: ["React", "Tailwind"],    accent: "#d6a44b", featured: true  },
-  { num: "02", title: "JogjaTech Blog",        type: "Web Platform",        tags: ["Next.js", "MDX"],       accent: "#a73522", featured: false },
-  { num: "03", title: "Candi Archive",         type: "Creative Experiment", tags: ["GSAP", "Next.js"],      accent: "#d6a44b", featured: false },
-  { num: "04", title: "Wayang Motion",         type: "Animation Library",   tags: ["SVG", "Motion"],        accent: "#a73522", featured: false },
-  { num: "05", title: "Nusantara UI Kit",      type: "Design System",       tags: ["Figma", "Tokens"],      accent: "#d6a44b", featured: false },
-  { num: "06", title: "Prambanan Scroll",      type: "Interactive Story",   tags: ["Three.js", "GLSL"],     accent: "#a73522", featured: false },
-  { num: "07", title: "Sogan Type",            type: "Web Typography",      tags: ["CSS", "Variable Font"], accent: "#d6a44b", featured: false },
-  { num: "08", title: "Pendopo Dashboard",     type: "Admin Panel",         tags: ["React", "Recharts"],    accent: "#a73522", featured: false },
-  { num: "09", title: "Gamelan Synth",         type: "Audio Experiment",    tags: ["Web Audio", "Tone.js"], accent: "#d6a44b", featured: false },
-  { num: "10", title: "Kris NFT Gallery",      type: "Web3 Frontend",       tags: ["Ethers.js", "Next.js"], accent: "#a73522", featured: false },
-  { num: "11", title: "Batik AR Filter",       type: "AR / WebXR",          tags: ["WebXR", "Spark AR"],    accent: "#d6a44b", featured: false },
-].map((p, i) => ({ ...p, image: IMAGES[i % IMAGES.length] }));
+import { projectList as projects } from "../data/projects";
 
 // ── layout constants ─────────────────────────────────────────────────────────
 const CARD_W   = 440;  // px  — landscape untuk screenshot landing page
@@ -194,11 +173,11 @@ export default function ProjectsSection() {
                     src={project.image}
                     alt={project.title}
                     fill
-                    sizes="300px"
-                    className="object-cover opacity-55 saturate-[0.5] transition-all duration-500 group-hover:opacity-70 group-hover:saturate-[0.75] group-hover:scale-[1.04]"
+                    sizes="440px"
+                    className="object-cover transition-all duration-500 group-hover:scale-[1.04]"
                     priority={i < 3}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b08]/95 via-[#0d0b08]/25 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b08] via-[#0d0b08]/40 to-transparent" />
                   <div className="absolute inset-0 batik-overlay opacity-[0.12]" />
 
                   {/* featured badge */}
@@ -244,7 +223,7 @@ export default function ProjectsSection() {
                     />
 
                     <a
-                      href="#"
+                      href={project.href ?? "#"}
                       className="mt-3 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.18em] text-[#f7efe0]/30 transition-colors group-hover:text-[#d6a44b]"
                     >
                       Lihat <span aria-hidden="true">→</span>
@@ -254,6 +233,36 @@ export default function ProjectsSection() {
               );
             })}
           </div>
+
+          {/* ── decorative floating texts ── */}
+
+          {/* big faded word — bottom left */}
+          <p
+            className="pointer-events-none absolute bottom-0 left-6 select-none font-black uppercase leading-none text-[#1a100a]"
+            style={{ fontSize: "clamp(5rem,9vw,10rem)", opacity: 0.045 }}
+            aria-hidden="true"
+          >
+            Karya
+          </p>
+
+          {/* "every project" — top center */}
+          <p className="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2 select-none text-[9px] font-black uppercase tracking-[0.35em] text-[#1a100a]/30" aria-hidden="true">
+            Every&nbsp;Project&nbsp;·&nbsp;Setiap&nbsp;Karya
+          </p>
+
+          {/* vertical label — far left */}
+          <p
+            className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 select-none text-[8px] font-black uppercase tracking-[0.28em] text-[#1a100a]/20"
+            style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+            aria-hidden="true"
+          >
+            Frontend&nbsp;·&nbsp;Indonesia&nbsp;·&nbsp;2026
+          </p>
+
+          {/* quote — bottom center */}
+          <p className="pointer-events-none absolute bottom-10 left-1/2 -translate-x-1/2 select-none text-center text-[10px] font-black italic text-[#1a100a]/25" aria-hidden="true">
+            "Dibangun dengan rasa, bukan hanya fungsi."
+          </p>
 
           {/* scroll hint arrow */}
           <div className="pointer-events-none absolute bottom-8 right-8 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b]/50">
