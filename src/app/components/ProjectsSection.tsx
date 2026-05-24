@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { projectList as projects } from "../data/projects";
 
 // ── layout constants ─────────────────────────────────────────────────────────
@@ -20,80 +22,100 @@ export default function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef   = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const subRef     = useRef<HTMLParagraphElement>(null);
+  const cardRefs   = useRef<(HTMLDivElement | null)[]>([]);
+  const textRefs   = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const section  = sectionRef.current;
     const track    = trackRef.current;
     if (!section || !track) return;
-    const sectionEl = section;
-    const trackEl = track;
 
+    gsap.registerPlugin(ScrollTrigger);
     const n = projects.length;
+    const trackWidth = PAD_L + n * STEP + PAD_R;
+    const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
+    const textPanels = textRefs.current.filter(Boolean) as HTMLDivElement[];
+    const state = { cardIdx: -1, isLight: false, textVisible: false };
 
-    function onScroll() {
-      const wh  = window.innerHeight;
-      const ww  = window.innerWidth;
-      const top = sectionEl.getBoundingClientRect().top;
-      const scrollInSection = -top;
-      const totalSectionScroll = sectionEl.offsetHeight - wh;
+    const setLightMode = (isLight: boolean) => {
+      if (state.isLight === isLight) return;
+      state.isLight = isLight;
 
-      const rawProgress  = scrollInSection / totalSectionScroll;
-      const progress     = Math.max(0, Math.min(1, rawProgress));
-
-      // ── horizontal track movement ─────────────────────────────────────────
-      const trackWidth   = PAD_L + n * STEP + PAD_R;
-      const maxTranslate = Math.max(0, trackWidth - ww);
-
-      // entry animation: slide dari kanan saat gallery pertama kali muncul
-      const entryT    = Math.min(1, progress / 0.07);
-      const entryEase = 1 - Math.pow(1 - entryT, 3); // ease-out cubic
-      const entryOffset = (1 - entryEase) * ww * 0.55;
-
-      trackEl.style.transform = `translateX(${-progress * maxTranslate + entryOffset}px)`;
-      trackEl.style.transition = entryT < 1 ? "transform 0.05s linear" : "none";
-
-      // ── current card counter ──────────────────────────────────────────────
-      const cardIdx = Math.min(n - 1, Math.floor(progress * n));
-      if (counterRef.current) {
-        counterRef.current.textContent = String(cardIdx + 1).padStart(2, "0");
-      }
-
-      // ── bg: putih saat masuk section, tetap putih setelah selesai ──────────
-      const isLight = scrollInSection > wh * 0.15;
-
-      sectionEl.style.backgroundColor = isLight ? "#f5f0e8" : "#100d0a";
-
-      const heading = sectionEl.querySelector<HTMLElement>("[data-heading]");
-      const sub     = sectionEl.querySelector<HTMLElement>("[data-sub]");
-      if (heading) {
-        heading.style.color      = isLight ? "#1a100a" : "#fff7ea";
-        heading.style.transition = "color 0.6s ease";
-      }
-      if (sub) {
-        sub.style.color      = isLight ? "#7a6a58" : "#4b3f30";
-        sub.style.transition = "color 0.6s ease";
-      }
-
-      const cards = trackEl.querySelectorAll<HTMLElement>("[data-card]");
-      cards.forEach((card) => {
-        card.style.boxShadow = isLight
-          ? "0 12px 56px rgba(0,0,0,0.22)"
-          : "0 12px 48px rgba(0,0,0,0.35)";
+      gsap.to(section, {
+        backgroundColor: isLight ? "#f5f0e8" : "#100d0a",
+        duration: 0.55,
+        ease: "power2.out",
+        overwrite: "auto",
       });
-
-      // teks muncul saat scroll gallery mulai
-      const textPanels = trackEl.querySelectorAll<HTMLElement>("[data-card-text]");
-      const textOpacity = progress > 0.02 ? 1 : 0;
-      textPanels.forEach((el) => { el.style.opacity = String(textOpacity); });
-    }
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    onScroll();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      gsap.to(headingRef.current, {
+        color: isLight ? "#1a100a" : "#fff7ea",
+        duration: 0.45,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+      gsap.to(subRef.current, {
+        color: isLight ? "#7a6a58" : "#4b3f30",
+        duration: 0.45,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+      gsap.to(cards, {
+        boxShadow: isLight
+          ? "0 12px 56px rgba(0,0,0,0.22)"
+          : "0 12px 48px rgba(0,0,0,0.35)",
+        duration: 0.45,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
     };
+
+    const ctx = gsap.context(() => {
+      gsap.set(track, { x: window.innerWidth * 0.55, force3D: true });
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          const maxTranslate = Math.max(0, trackWidth - window.innerWidth);
+          const entryT = Math.min(1, progress / 0.07);
+          const entryEase = 1 - Math.pow(1 - entryT, 3);
+          const entryOffset = (1 - entryEase) * window.innerWidth * 0.55;
+
+          gsap.set(track, {
+            x: -progress * maxTranslate + entryOffset,
+            force3D: true,
+          });
+
+          const cardIdx = Math.min(n - 1, Math.floor(progress * n));
+          if (state.cardIdx !== cardIdx) {
+            state.cardIdx = cardIdx;
+            if (counterRef.current) {
+              counterRef.current.textContent = String(cardIdx + 1).padStart(2, "0");
+            }
+          }
+
+          setLightMode(self.scroll() - self.start > window.innerHeight * 0.15);
+
+          const textVisible = progress > 0.02;
+          if (state.textVisible !== textVisible) {
+            state.textVisible = textVisible;
+            gsap.to(textPanels, {
+              opacity: textVisible ? 1 : 0,
+              duration: 0.45,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          }
+        },
+      });
+    }, section);
+
+    return () => ctx.revert();
   }, []);
 
   const trackWidth = PAD_L + projects.length * STEP + PAD_R;
@@ -117,7 +139,7 @@ export default function ProjectsSection() {
           </p>
           <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <h2
-              data-heading
+              ref={headingRef}
               className="font-black leading-[0.92]"
               style={{ fontSize: "clamp(2.4rem,5vw,4.5rem)", color: "#fff7ea", transition: "color 0.25s ease" }}
             >
@@ -138,7 +160,7 @@ export default function ProjectsSection() {
                 </span>
               </div>
               <p
-                data-sub
+                ref={subRef}
                 className="max-w-[26ch] text-sm font-medium leading-6"
                 style={{ color: "#4b3f30", transition: "color 0.25s ease" }}
               >
@@ -178,7 +200,7 @@ export default function ProjectsSection() {
                 >
                   {/* card image */}
                   <div
-                    data-card
+                    ref={(el) => { cardRefs.current[i] = el; }}
                     style={{
                       width: `${CARD_W}px`,
                       height: `${CARD_H}px`,
@@ -206,7 +228,7 @@ export default function ProjectsSection() {
 
                   {/* ── teks di kanan card ── */}
                 <div
-                  data-card-text
+                  ref={(el) => { textRefs.current[i] = el; }}
                   style={{
                     position: "absolute",
                     left: CARD_W + 24,
