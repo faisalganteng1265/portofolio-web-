@@ -6,16 +6,26 @@ import AboutSection from "./components/AboutSection";
 import NameMark from "./components/NameMark";
 
 const skillBento = [
-  { label: "React",       span: "col-span-2", aksara: "ꦫ", desc: "Library UI utama" },
-  { label: "Next.js",     span: "col-span-1", aksara: "ꦤ", desc: "Full-stack framework" },
-  { label: "TypeScript",  span: "col-span-1", aksara: "ꦠ", desc: "Type safety" },
-  { label: "Tailwind CSS",span: "col-span-1", aksara: "ꦕ", desc: "Utility CSS" },
-  { label: "Git",         span: "col-span-1", aksara: "ꦒ", desc: "Version control" },
-  { label: "Figma",       span: "col-span-2", aksara: "ꦥ", desc: "UI & Prototyping" },
-  { label: "Vercel",      span: "col-span-1", aksara: "ꦮ", desc: "Deploy & hosting" },
-  { label: "VS Code",     span: "col-span-1", aksara: "ꦏ", desc: "Primary editor" },
-  { label: "HTML / CSS",  span: "col-span-1", aksara: "ꦲ", desc: "Web fundamentals" },
-  { label: "Performance", span: "col-span-1", aksara: "ꦱ", desc: "Web Vitals" },
+  { label: "React",       span: "col-span-2", aksara: "ꦫ", desc: "Library UI utama", logo: ["/logo%20bahasa/react.svg"] },
+  { label: "Next.js",     span: "col-span-1", aksara: "ꦤ", desc: "Full-stack framework", logo: ["/logo%20bahasa/nextdotjs.svg"] },
+  { label: "TypeScript",  span: "col-span-1", aksara: "ꦠ", desc: "Type safety", logo: ["/logo%20bahasa/typescript.svg"] },
+  { label: "Tailwind CSS",span: "col-span-1", aksara: "ꦕ", desc: "Utility CSS", logo: ["/logo%20bahasa/tailwindcss.svg"] },
+  { label: "Solidity",    span: "col-span-1", aksara: "ꦱ", desc: "Smart contract language", logo: ["/logo%20bahasa/solidity.svg"] },
+  { label: "Node.js",     span: "col-span-1", aksara: "ꦤ", desc: "JavaScript runtime", logo: ["/logo%20bahasa/nodedotjs.svg"] },
+  { label: "Express.js",  span: "col-span-1", aksara: "ꦌ", desc: "Node.js backend framework", logo: ["/logo%20bahasa/express.svg"] },
+  { label: "Supabase",    span: "col-span-1", aksara: "ꦱ", desc: "Postgres backend platform", logo: ["/logo%20bahasa/supabase.svg"] },
+  { label: "SSMS / SQL",  span: "col-span-1", aksara: "ꦢ", desc: "SQL Server database tools", logo: ["/logo%20bahasa/microsoftsqlserver.svg"] },
+  { label: "Wagmi",       span: "col-span-1", aksara: "ꦮ", desc: "React hooks untuk Web3", logo: ["/logo%20bahasa/wagmi.svg"] },
+  { label: "ethers.js",   span: "col-span-1", aksara: "ꦲ", desc: "Ethereum JavaScript library", logo: ["/logo%20bahasa/ethers.svg"] },
+  { label: "Python",      span: "col-span-1", aksara: "ꦥ", desc: "Scripting & backend", logo: ["/logo%20bahasa/python.svg"] },
+  { label: "Kotlin",      span: "col-span-1", aksara: "ꦏ", desc: "Mobile & typed programming", logo: ["/logo%20bahasa/kotlin.svg"] },
+  { label: "Git",         span: "col-span-1", aksara: "ꦒ", desc: "Version control", logo: ["/logo%20bahasa/git.svg"] },
+  { label: "GitHub",      span: "col-span-1", aksara: "ꦓ", desc: "Code hosting & collaboration", logo: ["/logo%20bahasa/github.svg"] },
+  { label: "Figma",       span: "col-span-2", aksara: "ꦥ", desc: "UI & Prototyping", logo: ["/logo%20bahasa/figma.svg"] },
+  { label: "Vercel",      span: "col-span-1", aksara: "ꦮ", desc: "Deploy & hosting", logo: ["/logo%20bahasa/vercel.svg"] },
+  { label: "VS Code",     span: "col-span-1", aksara: "ꦏ", desc: "Primary editor", logo: ["/logo%20bahasa/vscode.svg"] },
+  { label: "HTML / CSS",  span: "col-span-1", aksara: "ꦲ", desc: "Web fundamentals", logo: ["/logo%20bahasa/html5.svg", "/logo%20bahasa/css.svg"] },
+  { label: "Performance", span: "col-span-1", aksara: "ꦱ", desc: "Web Vitals", logo: ["/logo%20bahasa/lighthouse.svg"] },
 ];
 
 export default function Home() {
@@ -45,12 +55,12 @@ export default function Home() {
           </h2>
 
           {/* bento skill grid */}
-          <div className="grid auto-rows-[88px] grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {skillBento.map((skill, i) => (
+          <div className="grid auto-rows-[108px] grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {skillBento.map((skill) => (
               <div
                 key={skill.label}
                 className={`skill-card reveal group relative overflow-hidden border border-[#1a100a]/10 bg-white p-4 transition-all duration-300 hover:border-[#d6a44b]/50 hover:bg-[#fdf8f2] ${
-                  i % 5 === 0 ? "col-span-2" : ""
+                  skill.span
                 }`}
               >
                 {/* aksara bg */}
@@ -61,12 +71,29 @@ export default function Home() {
                 >
                   {skill.aksara}
                 </p>
-                <p className="relative text-sm font-black text-[#2a1a0e] group-hover:text-[#a73522]">
-                  {skill.label}
-                </p>
-                <p className="relative mt-1 text-[9px] font-medium text-[#7a6a58]">
-                  {skill.desc}
-                </p>
+                <div className="relative flex h-full flex-col justify-between">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-black text-[#2a1a0e] group-hover:text-[#a73522]">
+                      {skill.label}
+                    </p>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {skill.logo.map((src) => (
+                        <Image
+                          key={src}
+                          src={src}
+                          alt={`${skill.label} logo`}
+                          width={24}
+                          height={24}
+                          unoptimized
+                          className="h-6 w-6 object-contain"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="max-w-[18ch] text-[9px] font-medium leading-4 text-[#7a6a58]">
+                    {skill.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
