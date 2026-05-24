@@ -10,10 +10,10 @@ const CARD_H   = 275;  // px
 const CARD_GAP = 32;   // px gap between cards
 const STEP     = CARD_W + CARD_GAP;
 const PAD_L    = 80;
-const PAD_R    = 120;
+const PAD_R    = 320;
 
 // Y offset per card (vh from top) — zigzag atas-bawah dengan variasi
-const Y_VH = [8, 42, 12, 46, 6, 38, 16, 48, 10, 40, 18, 44, 8];
+const Y_VH = [8, 42, 12, 46, 6, 38,  8, 48, 10, 40,  4, 44, 8, 42];
 
 
 export default function ProjectsSection() {
@@ -41,7 +41,14 @@ export default function ProjectsSection() {
       // ── horizontal track movement ─────────────────────────────────────────
       const trackWidth   = PAD_L + n * STEP + PAD_R;
       const maxTranslate = Math.max(0, trackWidth - ww);
-      track.style.transform = `translateX(${-progress * maxTranslate}px)`;
+
+      // entry animation: slide dari kanan saat gallery pertama kali muncul
+      const entryT    = Math.min(1, progress / 0.07);
+      const entryEase = 1 - Math.pow(1 - entryT, 3); // ease-out cubic
+      const entryOffset = (1 - entryEase) * ww * 0.55;
+
+      track.style.transform = `translateX(${-progress * maxTranslate + entryOffset}px)`;
+      track.style.transition = entryT < 1 ? "transform 0.05s linear" : "none";
 
       // ── current card counter ──────────────────────────────────────────────
       const cardIdx = Math.min(n - 1, Math.floor(progress * n));
@@ -235,12 +242,19 @@ export default function ProjectsSection() {
                       </span>
                     ))}
                   </div>
-                  <a
-                    href={project.href ?? "#"}
-                    className="mt-1 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#1a100a]/30 transition-colors hover:text-[#d6a44b]"
-                  >
-                    Lihat <span aria-hidden="true">→</span>
-                  </a>
+                  {(() => {
+                    const stack = project.tags.includes("Web3") ? "Web3" : project.tags.includes("Web2") ? "Web2" : null;
+                    if (!stack) return null;
+                    const isWeb3 = stack === "Web3";
+                    return (
+                      <span
+                        className="mt-1 text-[1.6rem] font-black uppercase tracking-[0.06em]"
+                        style={{ color: isWeb3 ? "#d6a44b" : "#a73522" }}
+                      >
+                        {stack}
+                      </span>
+                    );
+                  })()}
                 </div>
                 </div>
               );
