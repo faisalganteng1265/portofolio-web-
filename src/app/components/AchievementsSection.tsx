@@ -7,17 +7,6 @@ const MARQUEE_ITEMS = [
   "ꦭ  Most Favorite — Lisk Builder Program 2",
 ];
 
-// TODO: Ganti src dengan foto asli kamu
-const GALLERY_SLOTS = [
-  { label: "Workshop Base Indonesia", src: "/assets/borobudur-java.jpg" },
-  { label: "Hackathon Base", src: "/assets/kraton-yogyakarta.jpg" },
-  { label: "Dev Web3 Jogja", src: "/assets/wayang-kulit.jpg" },
-  { label: "Award Ceremony", src: "/assets/borobudur-java.jpg" },
-  { label: "Team at Work", src: "/assets/kraton-yogyakarta.jpg" },
-  { label: "Demo Day", src: "/assets/wayang-kulit.jpg" },
-  { label: "Web Design UTI", src: "/assets/borobudur-java.jpg" },
-  { label: "Lisk Builder 2", src: "/assets/kraton-yogyakarta.jpg" },
-];
 
 export default function AchievementsSection() {
   return (
@@ -97,11 +86,11 @@ export default function AchievementsSection() {
               {/* TODO: Ganti dengan foto kegiatan Base Build Hackathon */}
               <div className="absolute inset-0">
                 <Image
-                  src="/assets/borobudur-java.jpg"
+                  src="/achievement/baseproject.png"
                   alt="Base Build Hackathon Global"
                   fill
                   sizes="(min-width: 1024px) 57vw, 90vw"
-                  className="object-cover opacity-[0.28] saturate-[0.4] transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="object-cover opacity-[0.28] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09] via-[#0d0b09]/60 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b09]/30 via-transparent to-[#0d0b09]/20" />
@@ -109,7 +98,7 @@ export default function AchievementsSection() {
               <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#d6a44b] via-[#d6a44b]/40 to-transparent" />
 
               <div
-                className="relative flex h-full flex-col justify-between p-8 md:p-10"
+                className="relative flex h-full flex-col justify-between p-8 md:p-10 transition-all duration-500 group-hover:blur-sm"
                 style={{ minHeight: "520px" }}
               >
                 <div className="flex items-start justify-between">
@@ -169,17 +158,17 @@ export default function AchievementsSection() {
                 {/* TODO: Ganti dengan foto Web Design Competition UTI */}
                 <div className="absolute inset-0">
                   <Image
-                    src="/assets/kraton-yogyakarta.jpg"
+                    src="/achievement/web2.png"
                     alt="Web Design Competition UTI"
                     fill
                     sizes="(min-width: 1024px) 40vw, 90vw"
-                    className="object-cover opacity-[0.28] saturate-[0.4] transition-transform duration-700 group-hover:scale-[1.05]"
+                    className="object-cover opacity-[0.28] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.05] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#100e0c] via-[#100e0c]/55 to-transparent" />
                 </div>
                 <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#d6a44b]/70 to-transparent" />
                 <div
-                  className="relative flex h-full flex-col justify-between p-6"
+                  className="relative flex h-full flex-col justify-between p-6 transition-all duration-500 group-hover:blur-sm"
                   style={{ minHeight: "252px" }}
                 >
                   <div className="flex items-start justify-between">
@@ -214,17 +203,17 @@ export default function AchievementsSection() {
                 {/* TODO: Ganti dengan foto Hackathon Base Indonesia */}
                 <div className="absolute inset-0">
                   <Image
-                    src="/assets/wayang-kulit.jpg"
+                    src="/achievement/baseindo.png"
                     alt="Hackathon Base Indonesia"
                     fill
                     sizes="(min-width: 1024px) 40vw, 90vw"
-                    className="object-cover opacity-[0.22] saturate-[0.35] transition-transform duration-700 group-hover:scale-[1.05]"
+                    className="object-cover opacity-[0.22] saturate-[0.35] transition-all duration-700 group-hover:scale-[1.05] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09] via-[#0d0b09]/55 to-transparent" />
                 </div>
                 <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#a73522]/80 to-transparent" />
                 <div
-                  className="relative flex h-full flex-col justify-between p-6"
+                  className="relative flex h-full flex-col justify-between p-6 transition-all duration-500 group-hover:blur-sm"
                   style={{ minHeight: "252px" }}
                 >
                   <div className="flex items-start justify-between">
@@ -266,19 +255,20 @@ export default function AchievementsSection() {
             style={{ background: "#0c0a08" }}
           >
             {/* TODO: Ganti dengan foto Lisk Builder Program */}
-            <div className="absolute right-0 top-0 h-full w-[45%]">
+            <div className="absolute inset-0">
               <Image
-                src="/assets/borobudur-java.jpg"
+                src="/achievement/lisk.png"
                 alt="Lisk Builder Program 2"
                 fill
-                sizes="(min-width: 1024px) 45vw, 90vw"
-                className="object-cover opacity-[0.28] saturate-[0.35] transition-transform duration-700 group-hover:scale-[1.04]"
+                sizes="90vw"
+                className="object-cover object-top opacity-[0.28] saturate-[0.35] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0c0a08] via-[#0c0a08]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a08] via-[#0c0a08]/55 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0c0a08]/60 via-transparent to-[#0c0a08]/30" />
             </div>
             <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#a73522] via-[#a73522]/40 to-transparent" />
 
-            <div className="relative flex flex-col gap-6 px-8 py-9 lg:flex-row lg:items-center lg:justify-between lg:px-10 lg:py-10">
+            <div className="relative flex flex-col gap-6 px-8 py-9 lg:flex-row lg:items-center lg:justify-between lg:px-10 lg:py-10 transition-all duration-500 group-hover:blur-sm">
               <div>
                 <span className="border border-[#a73522]/30 bg-[#150606]/70 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.22em] text-[#a73522]/80">
                   Most Favorite Project
@@ -310,7 +300,7 @@ export default function AchievementsSection() {
         </div>
 
         {/* ─── BOOTCAMP ────────────────────────────────── */}
-        <div className="mb-20">
+        <div>
           <div className="mb-8 flex items-end justify-between border-b border-[#f7efe0]/8 pb-6">
             <div>
               <p className="reveal flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
@@ -341,11 +331,11 @@ export default function AchievementsSection() {
               {/* TODO: Ganti dengan foto kegiatan Base Indonesia Workshop */}
               <div className="relative overflow-hidden" style={{ height: "270px" }}>
                 <Image
-                  src="/assets/borobudur-java.jpg"
+                  src="/achievement/basework.png"
                   alt="Base Indonesia Workshop Batch 2"
                   fill
                   sizes="(min-width: 1024px) 50vw, 90vw"
-                  className="object-cover opacity-[0.38] saturate-[0.4] transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="object-cover opacity-[0.38] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.82] group-hover:saturate-[0.85]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#100e0c] via-[#100e0c]/30 to-transparent" />
                 <div className="absolute left-5 top-5 flex gap-2">
@@ -364,7 +354,7 @@ export default function AchievementsSection() {
                   ꦧ
                 </p>
               </div>
-              <div className="p-6 lg:p-7">
+              <div className="p-6 lg:p-7 transition-all duration-500 group-hover:blur-sm">
                 <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b]/60">
                   September – Oktober 2025
                 </p>
@@ -401,11 +391,11 @@ export default function AchievementsSection() {
               {/* TODO: Ganti dengan foto kegiatan Dev Web3 Jogja */}
               <div className="relative overflow-hidden" style={{ height: "270px" }}>
                 <Image
-                  src="/assets/wayang-kulit.jpg"
+                  src="/achievement/devweb3.png"
                   alt="Dev Web3 Jogja Batch 5"
                   fill
                   sizes="(min-width: 1024px) 50vw, 90vw"
-                  className="object-cover opacity-[0.38] saturate-[0.4] transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="object-cover opacity-[0.38] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.82] group-hover:saturate-[0.85]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09] via-[#0d0b09]/30 to-transparent" />
                 <div className="absolute left-5 top-5 flex gap-2">
@@ -424,7 +414,7 @@ export default function AchievementsSection() {
                   ꦮ
                 </p>
               </div>
-              <div className="p-6 lg:p-7">
+              <div className="p-6 lg:p-7 transition-all duration-500 group-hover:blur-sm">
                 <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b]/60">
                   November – Desember 2025
                 </p>
@@ -453,59 +443,6 @@ export default function AchievementsSection() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* ─── PHOTO GALLERY STRIP ─────────────────────── */}
-        <div>
-          <p className="reveal mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-            <span className="h-px w-6 bg-[#d6a44b]/60" />
-            Dokumentasi · Galeri
-          </p>
-
-          {/* horizontal scroll */}
-          <div
-            className="flex gap-3 overflow-x-auto pb-3"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {GALLERY_SLOTS.map((slot, i) => (
-              <div
-                key={i}
-                className="group relative shrink-0 overflow-hidden border border-[#f7efe0]/8 bg-[#120f0c]"
-                style={{ width: "200px", height: "280px" }}
-              >
-                {/* TODO: Ganti src dengan foto asli */}
-                <Image
-                  src={slot.src}
-                  alt={slot.label}
-                  fill
-                  sizes="200px"
-                  className="object-cover opacity-[0.32] saturate-[0.4] transition-all duration-500 group-hover:opacity-[0.5] group-hover:scale-[1.06]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#120f0c]/90 via-transparent to-transparent" />
-
-                {/* number */}
-                <p className="absolute left-4 top-4 text-[7px] font-black uppercase tracking-[0.22em] text-[#2e2620]">
-                  {String(i + 1).padStart(2, "0")}
-                </p>
-
-                {/* label */}
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-[8px] font-black text-[#4b3f30]">{slot.label}</p>
-                </div>
-
-                {/* hover hint */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <span className="border border-[#d6a44b]/30 bg-[#0e0c0a]/80 px-3 py-1.5 text-[7px] font-black uppercase tracking-[0.16em] text-[#d6a44b]/60 backdrop-blur-sm">
-                    Ganti foto
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-3 text-[8px] font-medium text-[#2e2620]">
-            ← geser · {GALLERY_SLOTS.length} slot foto dokumentasi
-          </p>
         </div>
 
       </div>
