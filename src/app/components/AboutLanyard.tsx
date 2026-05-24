@@ -12,6 +12,7 @@ const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 
 export default function AboutLanyard() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const lastPoint = useRef<Point | null>(null);
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
@@ -41,9 +42,14 @@ export default function AboutLanyard() {
     const dy = event.clientY - lastPoint.current.y;
 
     lastPoint.current = { x: event.clientX, y: event.clientY };
+    const bounds = containerRef.current?.getBoundingClientRect();
+    const maxX = bounds ? Math.max(140, bounds.width * 0.32) : 180;
+    const minY = bounds ? -Math.max(90, bounds.height * 0.18) : -110;
+    const maxY = bounds ? Math.max(130, bounds.height * 0.28) : 170;
+
     setOffset((current) => ({
-      x: clamp(current.x + dx * 0.8, -86, 86),
-      y: clamp(current.y + dy * 0.8, -52, 84),
+      x: clamp(current.x + dx * 0.8, -maxX, maxX),
+      y: clamp(current.y + dy * 0.8, minY, maxY),
     }));
   }
 
@@ -54,7 +60,14 @@ export default function AboutLanyard() {
   }
 
   return (
-    <div className="absolute inset-0 z-20 overflow-hidden">
+    <div
+      ref={containerRef}
+      className="absolute inset-0 z-20 cursor-grab touch-none overflow-hidden active:cursor-grabbing"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={release}
+      onPointerCancel={release}
+    >
       <svg
         className="pointer-events-none absolute inset-0 h-full w-full"
         viewBox="0 0 400 520"
@@ -99,11 +112,7 @@ export default function AboutLanyard() {
       </svg>
 
       <div
-        className="absolute left-1/2 top-1/2 w-[min(58vw,15rem)] cursor-grab touch-none select-none active:cursor-grabbing"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={release}
-        onPointerCancel={release}
+        className="absolute left-1/2 top-1/2 w-[min(58vw,15rem)] select-none"
         style={{
           transform: `translate(calc(-50% + ${offset.x}px), calc(-39% + ${offset.y}px)) rotate(${offset.x * 0.035}deg)`,
           transition: dragging

@@ -52,8 +52,8 @@ export default function Home() {
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 className="object-cover opacity-45 saturate-[0.5]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#100d0a]/88 via-[#100d0a]/34 to-[#100d0a]/52" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#100d0a]/36 via-transparent to-[#100d0a]/26" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#100d0a]/88 via-[#100d0a]/34 to-[#100d0a]/52" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#100d0a]/36 via-transparent to-[#100d0a]/26" />
               <p
                 className="pointer-events-none absolute inset-0 flex select-none items-center justify-center font-black text-[#d6a44b] opacity-[0.07]"
                 style={{ fontSize: "clamp(10rem,20vw,18rem)" }}
@@ -120,7 +120,7 @@ export default function Home() {
               {/* stats */}
               <div className="flex gap-8">
                 {[
-                  ["3+", "Proyek", "Selesai"],
+                  ["14+", "Proyek", "Selesai"],
                   ["2+", "Tahun", "Belajar"],
                   ["∞",  "Rasa",  "Jawa dalam kode"],
                 ].map(([num, title, sub]) => (
