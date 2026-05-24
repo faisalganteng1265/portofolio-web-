@@ -122,6 +122,78 @@ h1, h2, h3 {
   animation-delay: var(--about-delay, 0ms);
 }
 
+/* ─── SKILLS ORBIT ──────────────────────────── */
+
+@keyframes orbit-cw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes orbit-ccw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* ─── SKILLS MARQUEE (legacy) ────────────────── */
+
+@keyframes skills-marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes skills-marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+.skills-track-left {
+  width: max-content;
+  animation: skills-marquee-left linear infinite;
+  will-change: transform;
+}
+
+.skills-track-right {
+  width: max-content;
+  animation: skills-marquee-right linear infinite;
+  will-change: transform;
+}
+
+.skills-row-wrapper {
+  overflow: hidden;
+  opacity: 0;
+}
+
+.skills-header,
+.skills-bottom {
+  opacity: 0;
+}
+
+@keyframes skills-row-enter {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+[data-skills-in] .skills-header {
+  animation: skills-row-enter 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-skills-in] .skills-row-wrapper {
+  animation: skills-row-enter 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--row-delay, 0ms);
+}
+
+[data-skills-in] .skills-bottom {
+  animation: skills-row-enter 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 360ms;
+}
+
+.skills-row-wrapper:hover .skills-track-left,
+.skills-row-wrapper:hover .skills-track-right {
+  animation-play-state: paused;
+}
+
+/* ─────────────────────────────────────────────── */
+
 @keyframes about-bg-fade {
   from { opacity: 0; }
   to   { opacity: 0.018; }

@@ -3,30 +3,8 @@ import ProjectsSection from "./components/ProjectsSection";
 import BatikShaderBg from "./components/BatikShaderBg";
 import ScrollHero from "./components/ScrollHero";
 import AboutSection from "./components/AboutSection";
+import SkillsSection from "./components/SkillsSection";
 import NameMark from "./components/NameMark";
-
-const skillBento = [
-  { label: "React",       span: "col-span-2", aksara: "ꦫ", desc: "Library UI utama", logo: ["/logo%20bahasa/react.svg"] },
-  { label: "Next.js",     span: "col-span-1", aksara: "ꦤ", desc: "Full-stack framework", logo: ["/logo%20bahasa/nextdotjs.svg"] },
-  { label: "TypeScript",  span: "col-span-1", aksara: "ꦠ", desc: "Type safety", logo: ["/logo%20bahasa/typescript.svg"] },
-  { label: "Tailwind CSS",span: "col-span-1", aksara: "ꦕ", desc: "Utility CSS", logo: ["/logo%20bahasa/tailwindcss.svg"] },
-  { label: "Solidity",    span: "col-span-1", aksara: "ꦱ", desc: "Smart contract language", logo: ["/logo%20bahasa/solidity.svg"] },
-  { label: "Node.js",     span: "col-span-1", aksara: "ꦤ", desc: "JavaScript runtime", logo: ["/logo%20bahasa/nodedotjs.svg"] },
-  { label: "Express.js",  span: "col-span-1", aksara: "ꦌ", desc: "Node.js backend framework", logo: ["/logo%20bahasa/express.svg"] },
-  { label: "Supabase",    span: "col-span-1", aksara: "ꦱ", desc: "Postgres backend platform", logo: ["/logo%20bahasa/supabase.svg"] },
-  { label: "SSMS / SQL",  span: "col-span-1", aksara: "ꦢ", desc: "SQL Server database tools", logo: ["/logo%20bahasa/microsoftsqlserver.svg"] },
-  { label: "Wagmi",       span: "col-span-1", aksara: "ꦮ", desc: "React hooks untuk Web3", logo: ["/logo%20bahasa/wagmi.svg"] },
-  { label: "ethers.js",   span: "col-span-1", aksara: "ꦲ", desc: "Ethereum JavaScript library", logo: ["/logo%20bahasa/ethers.svg"] },
-  { label: "Python",      span: "col-span-1", aksara: "ꦥ", desc: "Scripting & backend", logo: ["/logo%20bahasa/python.svg"] },
-  { label: "Kotlin",      span: "col-span-1", aksara: "ꦏ", desc: "Mobile & typed programming", logo: ["/logo%20bahasa/kotlin.svg"] },
-  { label: "Git",         span: "col-span-1", aksara: "ꦒ", desc: "Version control", logo: ["/logo%20bahasa/git.svg"] },
-  { label: "GitHub",      span: "col-span-1", aksara: "ꦓ", desc: "Code hosting & collaboration", logo: ["/logo%20bahasa/github.svg"] },
-  { label: "Figma",       span: "col-span-2", aksara: "ꦥ", desc: "UI & Prototyping", logo: ["/logo%20bahasa/figma.svg"] },
-  { label: "Vercel",      span: "col-span-1", aksara: "ꦮ", desc: "Deploy & hosting", logo: ["/logo%20bahasa/vercel.svg"] },
-  { label: "VS Code",     span: "col-span-1", aksara: "ꦏ", desc: "Primary editor", logo: ["/logo%20bahasa/vscode.svg"] },
-  { label: "HTML / CSS",  span: "col-span-1", aksara: "ꦲ", desc: "Web fundamentals", logo: ["/logo%20bahasa/html5.svg", "/logo%20bahasa/css.svg"] },
-  { label: "Performance", span: "col-span-1", aksara: "ꦱ", desc: "Web Vitals", logo: ["/logo%20bahasa/lighthouse.svg"] },
-];
 
 export default function Home() {
   return (
@@ -42,63 +20,7 @@ export default function Home() {
       <ProjectsSection />
 
       {/* ─── SKILLS ───────────────────────────────────── */}
-      <section className="sticky top-0 z-10 bg-[#f5f0e8] px-5 py-20 md:px-8 lg:py-28">
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-[#d6a44b]/30 to-transparent" />
-
-        <div className="mx-auto max-w-7xl">
-          <p className="reveal mb-3 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#a73522]">
-            <span className="h-px w-6 bg-[#a73522]/60" />
-            Stack & Alat
-          </p>
-          <h2 className="reveal mb-10 text-[clamp(2rem,4vw,3.2rem)] font-black leading-[1.04] text-[#1a100a]">
-            Teknologi yang saya pakai sehari-hari.
-          </h2>
-
-          {/* bento skill grid */}
-          <div className="grid auto-rows-[108px] grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {skillBento.map((skill) => (
-              <div
-                key={skill.label}
-                className={`skill-card reveal group relative overflow-hidden border border-[#1a100a]/10 bg-white p-4 transition-all duration-300 hover:border-[#d6a44b]/50 hover:bg-[#fdf8f2] ${
-                  skill.span
-                }`}
-              >
-                {/* aksara bg */}
-                <p
-                  className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 select-none font-black leading-none text-[#d6a44b] opacity-[0.10] transition-opacity duration-300 group-hover:opacity-[0.18]"
-                  style={{ fontSize: "4.5rem" }}
-                  aria-hidden="true"
-                >
-                  {skill.aksara}
-                </p>
-                <div className="relative flex h-full flex-col justify-between">
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-black text-[#2a1a0e] group-hover:text-[#a73522]">
-                      {skill.label}
-                    </p>
-                    <div className="flex shrink-0 items-center gap-1.5">
-                      {skill.logo.map((src) => (
-                        <Image
-                          key={src}
-                          src={src}
-                          alt={`${skill.label} logo`}
-                          width={24}
-                          height={24}
-                          unoptimized
-                          className="h-6 w-6 object-contain"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="max-w-[18ch] text-[9px] font-medium leading-4 text-[#7a6a58]">
-                    {skill.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <SkillsSection />
 
       {/* ─── PROCESS ──────────────────────────────────── */}
       <section className="relative z-20 min-h-screen overflow-hidden bg-[#0e0c0a] px-5 py-20 md:px-8 lg:py-28" style={{ boxShadow: "0 -12px 48px rgba(0,0,0,0.28)", borderRadius: "28px 28px 0 0" }}>
