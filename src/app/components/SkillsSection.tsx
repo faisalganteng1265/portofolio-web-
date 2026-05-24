@@ -51,6 +51,7 @@ const ORBITS: OrbitDef[] = [
 
 export default function SkillsSection() {
   const sectionRef  = useRef<HTMLElement>(null);
+  const orbitStageRef = useRef<HTMLDivElement>(null);
   const chipRefs    = useRef(new Map<string, HTMLDivElement>());
   const anglesRef   = useRef(new Map<string, number>());
   const rafRef      = useRef(0);
@@ -76,6 +77,14 @@ export default function SkillsSection() {
       el.style.clipPath = progress > 0 ? `inset(0 ${(progress * 100).toFixed(2)}% 0 0)` : "";
       el.style.pointerEvents = progress >= 1 ? "none" : "";
 
+      const orbitStage = orbitStageRef.current;
+      if (orbitStage) {
+        const travel = progress * (window.innerWidth * 0.72);
+        const fade = Math.max(0, 1 - progress * 1.25);
+        orbitStage.style.transform = `translateX(${-travel.toFixed(2)}px)`;
+        orbitStage.style.opacity = String(fade);
+      }
+
       if (progress < 1) {
         next.style.transform = `translateX(${((1 - progress) * 6).toFixed(2)}%)`;
       } else {
@@ -90,6 +99,10 @@ export default function SkillsSection() {
       const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
       if (next) next.style.transform = "";
       if (sectionRef.current) sectionRef.current.style.clipPath = "";
+      if (orbitStageRef.current) {
+        orbitStageRef.current.style.transform = "";
+        orbitStageRef.current.style.opacity = "";
+      }
     };
   }, []);
 
@@ -198,7 +211,11 @@ export default function SkillsSection() {
       </div>
 
       {/* orbit stage */}
-      <div className="relative flex-1">
+      <div
+        ref={orbitStageRef}
+        className="relative flex-1 will-change-transform"
+        style={{ transition: "opacity 120ms linear" }}
+      >
 
         {/* orbit ring guides */}
         {[dims.r1, dims.r2, dims.r3].map((r) => (
