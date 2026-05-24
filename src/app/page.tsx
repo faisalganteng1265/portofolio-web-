@@ -98,7 +98,7 @@ export default function Home() {
       {/* ─── CONTACT ──────────────────────────────────── */}
       <section
         id="kontak"
-        className="relative z-30 min-h-screen overflow-hidden bg-[#0d0b09] px-5 py-20 md:px-8 lg:py-28"
+        className="relative z-40 min-h-screen overflow-hidden bg-[#0d0b09] px-5 py-20 md:px-8 lg:py-28"
         style={{ boxShadow: "0 -12px 48px rgba(0,0,0,0.32)", borderRadius: "28px 28px 0 0" }}
       >
         {/* WebGL: animated batik GLSL shader background */}

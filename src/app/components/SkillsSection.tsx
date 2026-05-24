@@ -61,6 +61,38 @@ export default function SkillsSection() {
   const [inView, setInView] = useState(false);
   const [dims, setDims]     = useState({ r1: 130, r2: 230, r3: 330 });
 
+  /* ── window-close scroll transition ── */
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const next = el.nextElementSibling as HTMLElement | null;
+      if (!next) return;
+      const vh = window.innerHeight;
+      const rect = next.getBoundingClientRect();
+      const progress = Math.max(0, Math.min(1, (vh - rect.top) / vh));
+
+      el.style.clipPath = progress > 0 ? `inset(0 ${(progress * 100).toFixed(2)}% 0 0)` : "";
+      el.style.pointerEvents = progress >= 1 ? "none" : "";
+
+      if (progress < 1) {
+        next.style.transform = `translateX(${((1 - progress) * 6).toFixed(2)}%)`;
+      } else {
+        next.style.transform = "";
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
+      if (next) next.style.transform = "";
+      if (sectionRef.current) sectionRef.current.style.clipPath = "";
+    };
+  }, []);
+
   /* ── intersection + resize ── */
   useEffect(() => {
     const el = sectionRef.current;
@@ -152,7 +184,7 @@ export default function SkillsSection() {
     <section
       ref={sectionRef}
       id="keahlian"
-      className="sticky top-0 z-10 flex h-svh flex-col overflow-hidden bg-[#f5f0e8]"
+      className="sticky top-0 z-30 flex h-svh flex-col overflow-hidden bg-[#f5f0e8]"
     >
       <div className="pointer-events-none absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#d6a44b]/30 to-transparent" />
 
