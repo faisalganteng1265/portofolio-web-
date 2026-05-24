@@ -201,7 +201,7 @@ export default function ScrollHero() {
               className="object-contain object-bottom"
               style={{
                 opacity: portraitOpacity * (1 - faceBoxProgress),
-                transform: isMobile ? "translateY(3.5%) scale(1.04)" : undefined,
+                transform: isMobile ? "translateY(2%) scale(0.86)" : undefined,
               }}
             />
             <Image
@@ -226,22 +226,22 @@ export default function ScrollHero() {
         </div>
 
         <div
-          className="absolute bottom-7 left-5 right-5 z-30 max-w-2xl md:bottom-8 md:left-8 md:right-auto"
+          className="absolute left-5 right-5 top-[11.5svh] z-30 max-w-2xl md:bottom-8 md:left-8 md:right-auto md:top-auto"
           style={{ opacity: 1 - darkProgress * 0.94 }}
         >
           <p className="mb-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#a73522] md:mb-4 md:text-[10px] md:tracking-[0.28em]">
             ꦧ꧀ꦭꦺꦴꦏ꧀ꦕꦺꦴꦤ꧀ · Blockchain Enthusiast
           </p>
-          <h1 className="text-[clamp(3.25rem,18vw,5.9rem)] font-black uppercase leading-[0.82] tracking-normal text-[#2a1a0e] md:text-[clamp(3.6rem,10vw,10rem)]">
+          <h1 className="text-[clamp(3.05rem,17vw,5.4rem)] font-black uppercase leading-[0.82] tracking-normal text-[#2a1a0e] md:text-[clamp(3.6rem,10vw,10rem)]">
             Abiyyu
             <br />
             Faisal Akmal
           </h1>
-          <div className="mt-5 md:hidden">
+          <div className="mt-4 md:hidden">
             <p className="max-w-[19rem] text-sm font-semibold leading-6 text-[#2a1a0e]/72">
               Web3 builder yang membangun dApps, smart contracts, dan interface yang punya rasa.
             </p>
-            <div className="mt-5 flex gap-2">
+            <div className="mt-4 flex gap-2">
               <a
                 href="#karya"
                 className="border border-[#2a1a0e]/18 bg-[#2a1a0e] px-4 py-3 text-[9px] font-black uppercase tracking-[0.18em] text-[#fff7ea]"
