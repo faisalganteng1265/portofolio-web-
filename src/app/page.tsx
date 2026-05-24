@@ -2,6 +2,7 @@ import Image from "next/image";
 import ProjectsSection from "./components/ProjectsSection";
 import BatikShaderBg from "./components/BatikShaderBg";
 import ScrollHero from "./components/ScrollHero";
+import AboutLanyard from "./components/AboutLanyard";
 import NameMark from "./components/NameMark";
 
 const skillBento = [
@@ -43,7 +44,7 @@ export default function Home() {
           <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-20">
             {/* photo / ornament */}
             <div className="reveal">
-              <div className="relative aspect-[4/5] overflow-hidden">
+              <div className="relative min-h-[560px] overflow-hidden md:min-h-[640px]">
                 {/* batik border frame */}
                 <div className="absolute inset-0 border-[1.5px] border-[#d6a44b]/22 z-10 pointer-events-none" />
                 <div className="absolute inset-3 border border-[#d6a44b]/14 z-10 pointer-events-none" />
@@ -55,30 +56,19 @@ export default function Home() {
                   sizes="(min-width: 1024px) 36vw, 90vw"
                   className="object-cover opacity-45 saturate-[0.5]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#100d0a]/88 via-[#100d0a]/20 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#100d0a]/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#100d0a]/88 via-[#100d0a]/34 to-[#100d0a]/52" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#100d0a]/36 via-transparent to-[#100d0a]/26" />
 
                 {/* big aksara overlay */}
                 <p
-                  className="pointer-events-none absolute inset-0 flex items-center justify-center font-black text-[#d6a44b] opacity-[0.07] select-none"
+                  className="pointer-events-none absolute inset-0 flex select-none items-center justify-center font-black text-[#d6a44b] opacity-[0.07]"
                   style={{ fontSize: "clamp(10rem,20vw,18rem)" }}
                   aria-hidden="true"
                 >
                   ꦄ
                 </p>
 
-                {/* name plate */}
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#d6a44b]">
-                    ꦄꦧꦶꦪꦸ ꦥꦻꦱꦭ꧀ ꦲꦏ꧀ꦩꦭ꧀
-                  </p>
-                  <p className="mt-1 text-base font-black text-[#fff7ea]">
-                    Abiyyu Faisal Akmal
-                  </p>
-                  <p className="text-xs font-medium text-[#9b8f7d]">
-                    Frontend Developer · Indonesia
-                  </p>
-                </div>
+                <AboutLanyard />
               </div>
             </div>
 

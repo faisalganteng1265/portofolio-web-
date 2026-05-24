@@ -224,7 +224,7 @@ export default function ScrollHero() {
           style={{ opacity: 1 - darkProgress * 0.94 }}
         >
           <p className="mb-4 text-[10px] font-black uppercase tracking-[0.28em] text-[#a73522]">
-            ꦥꦺꦴꦂꦠꦺꦴꦥꦺꦴꦭꦶꦪꦺꦴ · Frontend Developer
+            ꦧ꧀ꦭꦺꦴꦏ꧀ꦕꦺꦴꦤ꧀ · Blockchain Enthusiast
           </p>
           <h1 className="text-[clamp(3.6rem,10vw,10rem)] font-black uppercase leading-[0.82] tracking-normal text-[#2a1a0e]">
             Abiyyu

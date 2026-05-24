@@ -25,15 +25,17 @@ export default function ProjectsSection() {
     const section  = sectionRef.current;
     const track    = trackRef.current;
     if (!section || !track) return;
+    const sectionEl = section;
+    const trackEl = track;
 
     const n = projects.length;
 
     function onScroll() {
       const wh  = window.innerHeight;
       const ww  = window.innerWidth;
-      const top = section!.getBoundingClientRect().top;
+      const top = sectionEl.getBoundingClientRect().top;
       const scrollInSection = -top;
-      const totalSectionScroll = section!.offsetHeight - wh;
+      const totalSectionScroll = sectionEl.offsetHeight - wh;
 
       const rawProgress  = scrollInSection / totalSectionScroll;
       const progress     = Math.max(0, Math.min(1, rawProgress));
@@ -47,8 +49,8 @@ export default function ProjectsSection() {
       const entryEase = 1 - Math.pow(1 - entryT, 3); // ease-out cubic
       const entryOffset = (1 - entryEase) * ww * 0.55;
 
-      track.style.transform = `translateX(${-progress * maxTranslate + entryOffset}px)`;
-      track.style.transition = entryT < 1 ? "transform 0.05s linear" : "none";
+      trackEl.style.transform = `translateX(${-progress * maxTranslate + entryOffset}px)`;
+      trackEl.style.transition = entryT < 1 ? "transform 0.05s linear" : "none";
 
       // ── current card counter ──────────────────────────────────────────────
       const cardIdx = Math.min(n - 1, Math.floor(progress * n));
@@ -59,10 +61,10 @@ export default function ProjectsSection() {
       // ── bg: putih saat masuk section, tetap putih setelah selesai ──────────
       const isLight = scrollInSection > wh * 0.15;
 
-      section.style.backgroundColor = isLight ? "#f5f0e8" : "#100d0a";
+      sectionEl.style.backgroundColor = isLight ? "#f5f0e8" : "#100d0a";
 
-      const heading = section!.querySelector<HTMLElement>("[data-heading]");
-      const sub     = section!.querySelector<HTMLElement>("[data-sub]");
+      const heading = sectionEl.querySelector<HTMLElement>("[data-heading]");
+      const sub     = sectionEl.querySelector<HTMLElement>("[data-sub]");
       if (heading) {
         heading.style.color      = isLight ? "#1a100a" : "#fff7ea";
         heading.style.transition = "color 0.6s ease";
@@ -72,7 +74,7 @@ export default function ProjectsSection() {
         sub.style.transition = "color 0.6s ease";
       }
 
-      const cards = track.querySelectorAll<HTMLElement>("[data-card]");
+      const cards = trackEl.querySelectorAll<HTMLElement>("[data-card]");
       cards.forEach((card) => {
         card.style.boxShadow = isLight
           ? "0 12px 56px rgba(0,0,0,0.22)"
@@ -80,7 +82,7 @@ export default function ProjectsSection() {
       });
 
       // teks muncul saat scroll gallery mulai
-      const textPanels = track.querySelectorAll<HTMLElement>("[data-card-text]");
+      const textPanels = trackEl.querySelectorAll<HTMLElement>("[data-card-text]");
       const textOpacity = progress > 0.02 ? 1 : 0;
       textPanels.forEach((el) => { el.style.opacity = String(textOpacity); });
     }
@@ -288,7 +290,7 @@ export default function ProjectsSection() {
 
           {/* quote — bottom center */}
           <p className="pointer-events-none absolute bottom-10 left-1/2 -translate-x-1/2 select-none text-center text-[10px] font-black italic text-[#1a100a]/25" aria-hidden="true">
-            "Dibangun dengan rasa, bukan hanya fungsi."
+            &ldquo;Dibangun dengan rasa, bukan hanya fungsi.&rdquo;
           </p>
 
           {/* scroll hint arrow */}
