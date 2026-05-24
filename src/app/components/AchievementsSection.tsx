@@ -29,7 +29,7 @@ export default function AchievementsSection() {
   const sectionRef  = useRef<HTMLElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const dotRef      = useRef<HTMLDivElement>(null);
-  const sectionHRef = useRef(2400);
+  const timelineHRef = useRef(1600);
 
   // ── per-row refs (3 rows: achievement A, achievement B, bootcamp) ──────────
   const row0 = useRef<HTMLDivElement>(null);
@@ -53,47 +53,53 @@ export default function AchievementsSection() {
   const rightRefs = useMemo(() => [right0, right1, right2], []);
   const msRefs    = useMemo(() => [ms0,    ms1,    ms2],    []);
 
-  // ── row center Y positions (document-relative → section-relative px) ────────
-  const rowCenterYsRef = useRef<number[]>([99999, 99999, 99999]);
+  // ── trigger Y positions (milestone-relative → timeline-relative px) ─────────
+  const triggerYsRef = useRef<number[]>([99999, 99999, 99999]);
 
-  const computeRowCenters = useCallback(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    const sectionDocTop = section.getBoundingClientRect().top + window.scrollY;
-    rowRefs.forEach((rRef, i) => {
-      const el = rRef.current;
-      if (!el) return;
-      const elDocTop = el.getBoundingClientRect().top + window.scrollY;
-      rowCenterYsRef.current[i] = elDocTop - sectionDocTop + el.offsetHeight / 2;
+  const computeTimelineMetrics = useCallback(() => {
+    const timeline = timelineRef.current;
+    if (!timeline) return;
+
+    timelineHRef.current = timeline.offsetHeight;
+    const timelineDocTop = timeline.getBoundingClientRect().top + window.scrollY;
+
+    msRefs.forEach((msRef, i) => {
+      const milestone = msRef.current;
+      const row = rowRefs[i].current;
+      const milestoneRect = milestone?.getBoundingClientRect();
+      const target = milestoneRect && milestoneRect.height > 0 ? milestone : row;
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      const docTop = rect.top + window.scrollY;
+      triggerYsRef.current[i] = docTop - timelineDocTop + rect.height / 2;
     });
-  }, [rowRefs]);
+  }, [msRefs, rowRefs]);
 
-  // ── section height tracking ───────────────────────────────────────────────
+  // ── timeline height + trigger tracking ───────────────────────────────────
   useEffect(() => {
-    const el = sectionRef.current;
+    const el = timelineRef.current;
     if (!el) return;
-    sectionHRef.current = el.offsetHeight;
     const ro = new ResizeObserver(() => {
-      sectionHRef.current = el.offsetHeight;
-      computeRowCenters();
+      computeTimelineMetrics();
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [computeRowCenters]);
+  }, [computeTimelineMetrics]);
 
   useEffect(() => {
-    const t = setTimeout(computeRowCenters, 300);
-    window.addEventListener("resize", computeRowCenters);
+    const t = setTimeout(computeTimelineMetrics, 300);
+    window.addEventListener("resize", computeTimelineMetrics);
     return () => {
       clearTimeout(t);
-      window.removeEventListener("resize", computeRowCenters);
+      window.removeEventListener("resize", computeTimelineMetrics);
     };
-  }, [computeRowCenters]);
+  }, [computeTimelineMetrics]);
 
   // ── scroll tracking ────────────────────────────────────────────────────────
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
+    target: timelineRef,
+    offset: ["start center", "end center"],
   });
 
   const smooth = useSpring(scrollYProgress, { stiffness: 78, damping: 21, restDelta: 0.001 });
@@ -104,15 +110,15 @@ export default function AchievementsSection() {
 
   // ── main animation loop ────────────────────────────────────────────────────
   useMotionValueEvent(smooth, "change", (progress) => {
-    const sH  = sectionHRef.current;
-    const dot = LINE_PAD + progress * (sH - 2 * LINE_PAD);
+    const timelineH = timelineHRef.current;
+    const dot = LINE_PAD + progress * Math.max(0, timelineH - 2 * LINE_PAD);
     dotYMV.set(dot);
 
     const isDesktop = window.innerWidth >= 1024;
 
     rowRefs.forEach((_, i) => {
-      const rowCenter = rowCenterYsRef.current[i];
-      const dist      = Math.abs(dot - rowCenter);
+      const triggerY = triggerYsRef.current[i];
+      const dist      = Math.abs(dot - triggerY);
       const prox      = Math.max(0, 1 - dist / PART_THRESHOLD);
 
       const lEl  = leftRefs[i].current;
