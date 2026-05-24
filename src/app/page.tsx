@@ -26,106 +26,122 @@ export default function Home() {
       <ScrollHero />
 
       {/* ─── ABOUT ────────────────────────────────────── */}
-      <section
-        id="tentang"
-        className="relative overflow-hidden bg-[#100d0a] px-5 py-20 md:px-8 lg:py-32"
-      >
-        <div className="pointer-events-none absolute -right-12 top-0 text-[20vw] font-black leading-none text-[#d6a44b] opacity-[0.028]" aria-hidden="true">
-          ꦄ
-        </div>
+      <section id="tentang" className="relative overflow-hidden bg-[#100d0a]" style={{ minHeight: "100svh" }}>
 
-        <div className="relative mx-auto max-w-7xl">
-          {/* label */}
-          <p className="reveal mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.28em] text-[#d6a44b]">
-            <span className="h-px w-8 bg-[#d6a44b]/60" />
+        {/* top metadata bar */}
+        <div className="flex items-center justify-between border-b border-[#f7efe0]/8 px-8 py-4 md:px-12">
+          <p className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] text-[#d6a44b]">
+            <span className="h-px w-6 bg-[#d6a44b]/50" />
             Tentang Saya
           </p>
+          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#f7efe0]/25">02 · Profile</p>
+        </div>
 
-          <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-20">
-            {/* photo / ornament */}
-            <div className="reveal">
-              <div className="relative min-h-[560px] overflow-hidden md:min-h-[640px]">
-                {/* batik border frame */}
-                <div className="absolute inset-0 border-[1.5px] border-[#d6a44b]/22 z-10 pointer-events-none" />
-                <div className="absolute inset-3 border border-[#d6a44b]/14 z-10 pointer-events-none" />
+        {/* main grid — full bleed, no max-w */}
+        <div className="flex flex-col lg:grid lg:h-[calc(100svh-49px)]" style={{ gridTemplateColumns: "40% 1fr" }}>
 
-                <Image
-                  src="/assets/wayang-kulit.jpg"
-                  alt="Wayang Kulit"
-                  fill
-                  sizes="(min-width: 1024px) 36vw, 90vw"
-                  className="object-cover opacity-45 saturate-[0.5]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#100d0a]/88 via-[#100d0a]/34 to-[#100d0a]/52" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#100d0a]/36 via-transparent to-[#100d0a]/26" />
+          {/* ── LEFT: image + lanyard (logic untouched) ── */}
+          <div className="relative border-r border-[#f7efe0]/8">
+            <div className="relative h-full min-h-[520px] overflow-hidden">
+              <div className="absolute inset-0 border-[1.5px] border-[#d6a44b]/22 z-10 pointer-events-none" />
+              <div className="absolute inset-3 border border-[#d6a44b]/14 z-10 pointer-events-none" />
+              <Image
+                src="/assets/wayang-kulit.jpg"
+                alt="Wayang Kulit"
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                className="object-cover opacity-45 saturate-[0.5]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#100d0a]/88 via-[#100d0a]/34 to-[#100d0a]/52" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#100d0a]/36 via-transparent to-[#100d0a]/26" />
+              <p
+                className="pointer-events-none absolute inset-0 flex select-none items-center justify-center font-black text-[#d6a44b] opacity-[0.07]"
+                style={{ fontSize: "clamp(10rem,20vw,18rem)" }}
+                aria-hidden="true"
+              >ꦄ</p>
+              <AboutLanyard />
+            </div>
+          </div>
 
-                {/* big aksara overlay */}
-                <p
-                  className="pointer-events-none absolute inset-0 flex select-none items-center justify-center font-black text-[#d6a44b] opacity-[0.07]"
-                  style={{ fontSize: "clamp(10rem,20vw,18rem)" }}
-                  aria-hidden="true"
+          {/* ── RIGHT: editorial text layout ── */}
+          <div className="relative flex flex-col overflow-hidden">
+
+            {/* giant faded "02" background */}
+            <p className="pointer-events-none absolute -right-8 -top-10 select-none font-black leading-none text-[#f7efe0] opacity-[0.018]" style={{ fontSize: "32vw" }} aria-hidden="true">02</p>
+
+            {/* vertical accent — far right */}
+            <p className="pointer-events-none absolute bottom-20 right-5 hidden select-none text-[7px] font-black uppercase tracking-[0.3em] text-[#f7efe0]/12 lg:block" style={{ writingMode: "vertical-rl" }} aria-hidden="true">Interface · With · Rasa</p>
+
+            {/* ── HEADING — poster scale ── */}
+            <div className="px-10 pt-10 lg:px-14 lg:pt-14">
+              <h2 className="font-black uppercase leading-[0.85]">
+                <span className="block text-[#fff7ea]" style={{ fontSize: "clamp(3.5rem, 8.5vw, 8.5rem)" }}>
+                  HALO,
+                </span>
+                <span
+                  className="block"
+                  style={{
+                    fontSize: "clamp(3.5rem, 8.5vw, 8.5rem)",
+                    color: "transparent",
+                    WebkitTextStroke: "2px rgba(247,239,224,0.22)",
+                  }}
                 >
-                  ꦄ
-                </p>
+                  SAYA
+                </span>
+                <span
+                  className="font-display block text-[#d6a44b]"
+                  style={{ fontSize: "clamp(3.2rem, 8vw, 8rem)", fontStyle: "italic" }}
+                >
+                  Abiyyu.
+                </span>
+              </h2>
+            </div>
 
-                <AboutLanyard />
+            {/* ── BIO — two columns ── */}
+            <div className="mt-auto grid gap-6 border-t border-[#f7efe0]/8 px-10 pt-8 lg:grid-cols-2 lg:px-14">
+              <div>
+                <p className="mb-3 text-[9px] font-black uppercase tracking-[0.22em] text-[#a73522]">
+                  Blockchain Enthusiast
+                </p>
+                <p className="text-[0.9rem] font-medium leading-7 text-[#9b8f7d]">
+                  Mahasiswa IT yang sedang membangun cara sendiri untuk menggabungkan interface, rasa visual, dan engineering yang tetap rapi.
+                </p>
+              </div>
+              <div>
+                <p className="mb-3 text-[9px] font-black uppercase tracking-[0.22em] text-[#f7efe0]/18">Focus</p>
+                <p className="text-[0.9rem] font-medium leading-7 text-[#6f6252]">
+                  Saya tertarik pada web yang terasa hidup tanpa kehilangan fungsi. Motif lokal, animasi, dan struktur komponen saya pakai sebagai bahasa visual, bukan sekadar hiasan.
+                </p>
               </div>
             </div>
 
-            {/* text content */}
-            <div className="flex flex-col justify-center">
-              <h2 className="reveal text-[clamp(2rem,4.5vw,3.8rem)] font-black leading-[1.04] text-[#fff7ea]">
-                Halo, saya Abiyyu.{" "}
-                <span className="text-[#d6a44b]">Frontend developer</span>{" "}
-                yang berpikir dengan rasa.
-              </h2>
-
-              <p className="reveal mt-6 max-w-[52ch] text-[0.96rem] font-medium leading-8 text-[#9b8f7d]">
-                Mahasiswa IT yang percaya bahwa kode yang baik bukan hanya
-                soal fungsi—tapi juga tentang perasaan yang muncul saat
-                pengguna pertama kali melihat halaman itu. Saya membawa
-                warisan visual Nusantara ke dalam antarmuka digital yang
-                modern dan usable.
-              </p>
-
-              <div className="java-rule reveal mt-8" />
-
-              {/* stat cards */}
-              <div className="reveal mt-8 grid grid-cols-3 gap-3">
+            {/* ── BOTTOM STRIP — stats + tags ── */}
+            <div className="mt-6 flex flex-col gap-5 border-t border-[#f7efe0]/8 px-10 py-6 lg:flex-row lg:items-end lg:justify-between lg:px-14">
+              {/* stats */}
+              <div className="flex gap-8">
                 {[
-                  ["3+", "Proyek", "Selesai & published"],
-                  ["2+", "Tahun", "Belajar & build"],
-                  ["∞", "Rasa", "Jawa dalam kode"],
+                  ["3+", "Proyek", "Selesai"],
+                  ["2+", "Tahun", "Belajar"],
+                  ["∞",  "Rasa",  "Jawa dalam kode"],
                 ].map(([num, title, sub]) => (
-                  <div
-                    key={title}
-                    className="border border-[#f7efe0]/10 bg-[#18120e] p-4"
-                  >
-                    <p className="text-2xl font-black text-[#d6a44b]">{num}</p>
-                    <p className="mt-0.5 text-sm font-black text-[#fff7ea]">
-                      {title}
-                    </p>
-                    <p className="text-[9px] font-medium text-[#6b5f4f]">
-                      {sub}
-                    </p>
+                  <div key={title}>
+                    <p className="text-[2.2rem] font-black leading-none text-[#d6a44b]">{num}</p>
+                    <p className="mt-1 text-[8px] font-black uppercase tracking-[0.18em] text-[#fff7ea]">{title}</p>
+                    <p className="text-[8px] font-medium text-[#4b3f30]">{sub}</p>
                   </div>
                 ))}
               </div>
 
               {/* tags */}
-              <div className="reveal mt-6 flex flex-wrap gap-2">
-                {["Jawa", "IT Student", "Web Dev", "UI Design", "Open Source"].map(
-                  (tag) => (
-                    <span
-                      key={tag}
-                      className="border border-[#f7efe0]/10 bg-[#1a1410] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#9b8f7d]"
-                    >
-                      {tag}
-                    </span>
-                  )
-                )}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                {["Jawa", "IT Student", "Web Dev", "UI Design", "Open Source"].map((tag, i) => (
+                  <span key={tag} className="text-[8px] font-black uppercase tracking-[0.2em] text-[#4b3f30]">
+                    {i > 0 && <span className="mr-4 text-[#d6a44b]/40">/</span>}{tag}
+                  </span>
+                ))}
               </div>
             </div>
+
           </div>
         </div>
       </section>
