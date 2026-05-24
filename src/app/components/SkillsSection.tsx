@@ -74,7 +74,7 @@ export default function SkillsSection() {
 
     const obs = new IntersectionObserver(
       ([e]) => setInView(e.isIntersecting),
-      { threshold: 0.12 }
+      { threshold: 0.5 }
     );
     obs.observe(el);
     recalc();
@@ -114,12 +114,12 @@ export default function SkillsSection() {
       const visible = inViewRef.current;
       const elapsed = (now - entryTimeRef.current) / 1000;
 
-      // burst radius: 0 → full over 0.7s (ease-out cubic)
-      const burstT    = Math.min(1, elapsed / 0.7);
+      // burst radius: 0 → full over 2s (ease-out cubic)
+      const burstT    = Math.min(1, elapsed / 2);
       const burstEase = 1 - Math.pow(1 - burstT, 3);
 
-      // fast-spin entry: 20x at t=0, decays to 1x by ~1s
-      const boost = visible ? 1 + 19 * Math.exp(-elapsed * 5) : 0;
+      // fast-spin entry: 20x at t=0, decays to 1x by ~7s
+      const boost = visible ? 1 + 19 * Math.exp(-elapsed * 0.65) : 0;
 
       ORBITS.forEach((orbit, oi) => {
         const targetR   = radii[oi];
