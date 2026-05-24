@@ -66,9 +66,11 @@ export default function SkillsSection() {
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
+    const orbitStageEl = orbitStageRef.current;
+    const nextEl = el.nextElementSibling as HTMLElement | null;
 
     const onScroll = () => {
-      const next = el.nextElementSibling as HTMLElement | null;
+      const next = nextEl;
       if (!next) return;
       const vh = window.innerHeight;
       const rect = next.getBoundingClientRect();
@@ -77,7 +79,7 @@ export default function SkillsSection() {
       el.style.clipPath = progress > 0 ? `inset(0 ${(progress * 100).toFixed(2)}% 0 0)` : "";
       el.style.pointerEvents = progress >= 1 ? "none" : "";
 
-      const orbitStage = orbitStageRef.current;
+      const orbitStage = orbitStageEl;
       if (orbitStage) {
         const travel = progress * (window.innerWidth * 0.72);
         const fade = Math.max(0, 1 - progress * 1.25);
@@ -96,12 +98,11 @@ export default function SkillsSection() {
     onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
-      const next = sectionRef.current?.nextElementSibling as HTMLElement | null;
-      if (next) next.style.transform = "";
-      if (sectionRef.current) sectionRef.current.style.clipPath = "";
-      if (orbitStageRef.current) {
-        orbitStageRef.current.style.transform = "";
-        orbitStageRef.current.style.opacity = "";
+      if (nextEl) nextEl.style.transform = "";
+      el.style.clipPath = "";
+      if (orbitStageEl) {
+        orbitStageEl.style.transform = "";
+        orbitStageEl.style.opacity = "";
       }
     };
   }, []);
@@ -200,6 +201,13 @@ export default function SkillsSection() {
       className="sticky top-0 z-30 flex h-svh flex-col overflow-hidden bg-[#f5f0e8]"
     >
       <div className="pointer-events-none absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#d6a44b]/30 to-transparent" />
+      <p
+        className="pointer-events-none absolute right-[4vw] top-8 select-none font-black leading-none text-[#1a100a] opacity-[0.035]"
+        style={{ fontSize: "clamp(10rem,22vw,22rem)" }}
+        aria-hidden="true"
+      >
+        ꦱ
+      </p>
 
       {/* top bar */}
       <div className="shrink-0 flex items-center justify-between border-b border-[#1a100a]/8 px-8 py-3.5 md:px-12">

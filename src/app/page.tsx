@@ -1,10 +1,10 @@
-import Image from "next/image";
 import ProjectsSection from "./components/ProjectsSection";
 import BatikShaderBg from "./components/BatikShaderBg";
 import ScrollHero from "./components/ScrollHero";
 import AboutSection from "./components/AboutSection";
 import SkillsSection from "./components/SkillsSection";
 import NameMark from "./components/NameMark";
+import AchievementsSection from "./components/AchievementsSection";
 
 export default function Home() {
   return (
@@ -22,78 +22,8 @@ export default function Home() {
       {/* ─── SKILLS ───────────────────────────────────── */}
       <SkillsSection />
 
-      {/* ─── PROCESS ──────────────────────────────────── */}
-      <section className="relative z-20 min-h-screen overflow-hidden bg-[#0e0c0a] px-5 py-20 md:px-8 lg:py-28" style={{ boxShadow: "0 -12px 48px rgba(0,0,0,0.28)", borderRadius: "28px 28px 0 0" }}>
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
-          {/* image */}
-          <div className="reveal relative min-h-[380px] overflow-hidden border border-[#f7efe0]/8 lg:order-2">
-            <Image
-              src="/assets/kraton-yogyakarta.jpg"
-              alt="Pendopo Keraton Yogyakarta"
-              fill
-              sizes="(min-width: 1024px) 44vw, 100vw"
-              className="object-cover opacity-55 saturate-[0.6]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0e0c0a] via-[#0e0c0a]/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 p-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-                Pendopo mindset
-              </p>
-              <p className="mt-1 text-xs font-medium text-[#6b5f4f]">
-                Tenang di permukaan, disiplin di struktur
-              </p>
-            </div>
-          </div>
-
-          {/* steps */}
-          <div className="flex flex-col justify-center lg:order-1">
-            <p className="reveal flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-              <span className="h-px w-6 bg-[#d6a44b]/60" />
-              Cara Kerja
-            </p>
-            <h2 className="reveal mt-5 text-[clamp(2rem,4vw,3.2rem)] font-black leading-[1.06]">
-              Tenang di permukaan, disiplin di struktur.
-            </h2>
-
-            <div className="mt-8 grid gap-0">
-              {[
-                [
-                  "ꦱ",
-                  "Riset Cepat",
-                  "Membaca konteks, target pengguna, dan visual brand sebelum membuat satu baris kode.",
-                ],
-                [
-                  "ꦧ",
-                  "Build Terukur",
-                  "Komponen dibuat responsif, konsisten, dan mudah diganti kontennya tanpa merombak struktur.",
-                ],
-                [
-                  "ꦥ",
-                  "Polish & Launch",
-                  "Spacing, motion, kontras, dan performa dicek sampai halaman terasa matang dan siap tayang.",
-                ],
-              ].map(([aksara, title, text]) => (
-                <div
-                  key={title}
-                  className="reveal group border-t border-[#f7efe0]/10 py-6 first:border-t-0"
-                >
-                  <div className="flex gap-5">
-                    <span className="mt-0.5 shrink-0 font-black text-[#d6a44b]/50 text-2xl leading-none group-hover:text-[#d6a44b] transition-colors">
-                      {aksara}
-                    </span>
-                    <div>
-                      <h3 className="font-black text-[#fff7ea]">{title}</h3>
-                      <p className="mt-2 text-sm font-medium leading-7 text-[#9b8f7d]">
-                        {text}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ─── ACHIEVEMENTS ─────────────────────────────── */}
+      <AchievementsSection />
 
       {/* ─── CONTACT ──────────────────────────────────── */}
       <section
