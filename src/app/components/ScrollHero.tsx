@@ -16,11 +16,13 @@ const aboutMarquee = [
 
 export default function ScrollHero() {
   const [progress, setProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const update = () => {
       const viewport = window.innerHeight || 1;
       setProgress(clamp(window.scrollY / (viewport * 0.78)));
+      setIsMobile(window.innerWidth < 768);
     };
 
     update();
@@ -36,16 +38,19 @@ export default function ScrollHero() {
   const darkProgress = clamp((progress - 0.18) / 0.72);
   const exitProgress = clamp((progress - 0.86) / 0.14);
   const faceBoxProgress = clamp((darkProgress - 0.36) / 0.64);
-  const cardScale = 1 - darkProgress * 0.48;
+  const cardScale = 1 - darkProgress * (isMobile ? 0.36 : 0.48);
   const cardY = darkProgress * -4;
   const portraitOpacity = 1 - darkProgress * 0.34;
   const topLogoColor = darkProgress > 0.45 ? "#d6a44b" : "#2a1a0e";
-  const faceBoxHeight = 96 - faceBoxProgress * 48;
-  const faceBoxMinHeight = 660 - faceBoxProgress * 260;
-  const faceBoxAspect = 0.68 + faceBoxProgress * 0.76;
+  const faceBoxHeight = (isMobile ? 76 : 96) - faceBoxProgress * (isMobile ? 30 : 48);
+  const faceBoxMinHeight = (isMobile ? 430 : 660) - faceBoxProgress * (isMobile ? 160 : 260);
+  const faceBoxAspect = (isMobile ? 0.72 : 0.68) + faceBoxProgress * (isMobile ? 0.46 : 0.76);
+  const faceBoxTranslateY = isMobile
+    ? 4 + cardY - faceBoxProgress * 5
+    : 10 + cardY - faceBoxProgress * 8;
 
   return (
-    <section id="home" className="relative h-[190svh] bg-[#100d0a]">
+    <section id="home" className="relative h-[158svh] bg-[#100d0a] md:h-[190svh]">
       <div
         className="sticky top-0 min-h-svh overflow-hidden px-5 md:px-8"
         style={{
@@ -57,10 +62,10 @@ export default function ScrollHero() {
           className="pointer-events-none absolute left-5 top-6 z-20 leading-[0.78] md:left-8"
           style={{ opacity: 1 - exitProgress }}
         >
-          <p className="font-display text-[2.35rem] font-normal uppercase tracking-normal md:text-[3rem]">
+          <p className="font-display text-[1.85rem] font-normal uppercase tracking-normal md:text-[3rem]">
             ABIYYU
           </p>
-          <p className="text-[1.95rem] font-black uppercase tracking-normal md:text-[2.6rem]">
+          <p className="text-[1.55rem] font-black uppercase tracking-normal md:text-[2.6rem]">
             FAISAL
           </p>
         </div>
@@ -103,7 +108,7 @@ export default function ScrollHero() {
         </div>
 
         <div
-          className="pointer-events-none absolute left-1/2 top-9 z-20 text-4xl font-black leading-none"
+          className="pointer-events-none absolute left-1/2 top-7 z-20 text-3xl font-black leading-none md:top-9 md:text-4xl"
           style={{
             color: topLogoColor,
             opacity: 1 - exitProgress,
@@ -115,7 +120,7 @@ export default function ScrollHero() {
         </div>
 
         <div
-          className="pointer-events-none absolute left-1/2 top-[20%] z-20 -translate-x-1/2 text-center"
+          className="pointer-events-none absolute left-1/2 top-[17%] z-20 -translate-x-1/2 text-center md:top-[20%]"
           style={{ opacity: faceBoxProgress }}
         >
           <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#d6a44b]">
@@ -135,7 +140,7 @@ export default function ScrollHero() {
             className="marquee-track flex gap-[4vw] whitespace-nowrap font-black uppercase leading-[0.86]"
             style={{
               color: `color-mix(in srgb, #d6a44b ${darkProgress * 100}%, #2a1a0e ${100 - darkProgress * 100}%)`,
-              fontSize: "clamp(4.4rem, 8.8vw, 10.5rem)",
+              fontSize: "clamp(3.4rem, 12vw, 10.5rem)",
             }}
           >
             {[0, 1].map((copy) =>
@@ -164,7 +169,7 @@ export default function ScrollHero() {
         </div>
 
         <div
-          className="absolute inset-0 z-10 grid place-items-center pt-8"
+          className="absolute inset-0 z-10 grid place-items-center pt-14 md:pt-8"
           style={{ opacity: 1 }}
         >
           <div
@@ -176,9 +181,9 @@ export default function ScrollHero() {
               boxShadow: `0 34px 110px rgba(0,0,0,${faceBoxProgress * 0.18})`,
               filter: `saturate(${1 - darkProgress * 0.35}) contrast(${1 + darkProgress * 0.1})`,
               height: `${faceBoxHeight}svh`,
-              maxHeight: "1040px",
+              maxHeight: isMobile ? "690px" : "1040px",
               minHeight: `${faceBoxMinHeight}px`,
-              transform: `translate3d(0, ${10 + cardY - faceBoxProgress * 8}svh, 0) scale(${cardScale})`,
+              transform: `translate3d(0, ${faceBoxTranslateY}svh, 0) scale(${cardScale})`,
             }}
           >
             <div
@@ -220,17 +225,36 @@ export default function ScrollHero() {
         </div>
 
         <div
-          className="absolute bottom-8 left-5 z-30 max-w-2xl md:left-8"
+          className="absolute bottom-7 left-5 right-5 z-30 max-w-2xl md:bottom-8 md:left-8 md:right-auto"
           style={{ opacity: 1 - darkProgress * 0.94 }}
         >
-          <p className="mb-4 text-[10px] font-black uppercase tracking-[0.28em] text-[#a73522]">
+          <p className="mb-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#a73522] md:mb-4 md:text-[10px] md:tracking-[0.28em]">
             ꦧ꧀ꦭꦺꦴꦏ꧀ꦕꦺꦴꦤ꧀ · Blockchain Enthusiast
           </p>
-          <h1 className="text-[clamp(3.6rem,10vw,10rem)] font-black uppercase leading-[0.82] tracking-normal text-[#2a1a0e]">
+          <h1 className="text-[clamp(3.25rem,18vw,5.9rem)] font-black uppercase leading-[0.82] tracking-normal text-[#2a1a0e] md:text-[clamp(3.6rem,10vw,10rem)]">
             Abiyyu
             <br />
             Faisal Akmal
           </h1>
+          <div className="mt-5 md:hidden">
+            <p className="max-w-[19rem] text-sm font-semibold leading-6 text-[#2a1a0e]/72">
+              Web3 builder yang membangun dApps, smart contracts, dan interface yang punya rasa.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <a
+                href="#karya"
+                className="border border-[#2a1a0e]/18 bg-[#2a1a0e] px-4 py-3 text-[9px] font-black uppercase tracking-[0.18em] text-[#fff7ea]"
+              >
+                Karya
+              </a>
+              <a
+                href="#experience"
+                className="border border-[#2a1a0e]/20 bg-[#fff7ea]/25 px-4 py-3 text-[9px] font-black uppercase tracking-[0.18em] text-[#2a1a0e]"
+              >
+                Experience
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>

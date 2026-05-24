@@ -31,6 +31,7 @@ export default function ProjectsSection() {
     const section  = sectionRef.current;
     const track    = trackRef.current;
     if (!section || !track) return;
+    if (window.innerWidth < 768) return;
 
     gsap.registerPlugin(ScrollTrigger);
     const n = projects.length;
@@ -164,15 +165,90 @@ export default function ProjectsSection() {
                 className="max-w-[26ch] text-sm font-medium leading-6"
                 style={{ color: "#4b3f30", transition: "color 0.25s ease" }}
               >
-                Scroll — {projects.length} proyek meluncur ke kanan, atas-bawah.
+                <span className="md:hidden">{projects.length} proyek dalam stack cepat dibaca.</span>
+                <span className="hidden md:inline">Scroll — {projects.length} proyek meluncur ke kanan, atas-bawah.</span>
               </p>
             </div>
           </div>
         </div>
       </div>
 
+      {/* ── Mobile stacked gallery ── */}
+      <div className="px-5 pb-16 md:hidden">
+        <div className="mb-5 flex items-center justify-between border-y border-[#f7efe0]/8 py-3">
+          <p className="text-[8px] font-black uppercase tracking-[0.22em] text-[#d6a44b]">
+            Project Stack
+          </p>
+          <p className="text-[8px] font-black uppercase tracking-[0.22em] text-[#4b3f30]">
+            {projects.length} shipped
+          </p>
+        </div>
+
+        <div className="space-y-5">
+          {projects.map((project, i) => {
+            const stack = project.tags.includes("Web3")
+              ? "Web3"
+              : project.tags.includes("Web2")
+                ? "Web2"
+                : "Project";
+            const isWeb3 = stack === "Web3";
+
+            return (
+              <article
+                key={project.title}
+                className="reveal group relative overflow-hidden border border-[#f7efe0]/10 bg-[#130f0b]"
+              >
+                <div className="relative aspect-[1.25/1] overflow-hidden">
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    sizes="100vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    priority={i < 2}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#130f0b] via-[#130f0b]/10 to-transparent" />
+                  <span className="absolute left-4 top-4 border border-[#d6a44b]/35 bg-[#100d0a]/70 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.18em] text-[#d6a44b] backdrop-blur-sm">
+                    {project.num}
+                  </span>
+                  <span
+                    className="absolute right-4 top-4 border px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.18em] backdrop-blur-sm"
+                    style={{
+                      borderColor: isWeb3 ? "#d6a44b55" : "#a7352255",
+                      background: isWeb3 ? "#d6a44b18" : "#a7352218",
+                      color: isWeb3 ? "#d6a44b" : "#a73522",
+                    }}
+                  >
+                    {stack}
+                  </span>
+                </div>
+
+                <div className="relative p-5">
+                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-[#a73522]">
+                    {project.type}
+                  </p>
+                  <h3 className="mt-2 text-2xl font-black leading-none text-[#fff7ea]">
+                    {project.title}
+                  </h3>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="border border-[#f7efe0]/10 bg-[#f7efe0]/[0.03] px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#8d8170]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+
       {/* ── Scroll-driven horizontal gallery ── */}
-      <div style={{ height: `${Math.max(300, projects.length * 90)}vh` }}>
+      <div className="hidden md:block" style={{ height: `${Math.max(300, projects.length * 90)}vh` }}>
         <div className="sticky top-0 overflow-hidden" style={{ height: "100vh" }}>
           {/* horizontal track */}
           <div
