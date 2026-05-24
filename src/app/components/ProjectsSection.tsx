@@ -31,7 +31,31 @@ export default function ProjectsSection() {
     const section  = sectionRef.current;
     const track    = trackRef.current;
     if (!section || !track) return;
-    if (window.innerWidth < 768) return;
+    if (window.innerWidth < 768) {
+      const state = { isLight: false };
+      const setLightMode = (isLight: boolean) => {
+        if (state.isLight === isLight) return;
+        state.isLight = isLight;
+        section.style.backgroundColor = isLight ? "#f5f0e8" : "#100d0a";
+        if (headingRef.current) headingRef.current.style.color = isLight ? "#1a100a" : "#fff7ea";
+        if (subRef.current) subRef.current.style.color = isLight ? "#7a6a58" : "#4b3f30";
+      };
+
+      const onScroll = () => {
+        const rect = section.getBoundingClientRect();
+        const triggerY = window.innerHeight * 0.32;
+        setLightMode(rect.top < triggerY && rect.bottom > triggerY);
+      };
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+      onScroll();
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+        section.style.backgroundColor = "#100d0a";
+      };
+    }
 
     gsap.registerPlugin(ScrollTrigger);
     const n = projects.length;
@@ -177,14 +201,14 @@ export default function ProjectsSection() {
       <div className="px-5 pb-16 md:hidden">
         <div className="mb-5 flex items-center justify-between border-y border-[#f7efe0]/8 py-3">
           <p className="text-[8px] font-black uppercase tracking-[0.22em] text-[#d6a44b]">
-            Project Stack
+            Scroll Stack
           </p>
           <p className="text-[8px] font-black uppercase tracking-[0.22em] text-[#4b3f30]">
             {projects.length} shipped
           </p>
         </div>
 
-        <div className="space-y-5">
+        <div className="pb-[36svh]">
           {projects.map((project, i) => {
             const stack = project.tags.includes("Web3")
               ? "Web3"
@@ -196,7 +220,11 @@ export default function ProjectsSection() {
             return (
               <article
                 key={project.title}
-                className="reveal group relative overflow-hidden border border-[#f7efe0]/10 bg-[#130f0b]"
+                className="reveal group sticky mb-7 overflow-hidden border border-[#f7efe0]/10 bg-[#130f0b] shadow-[0_18px_56px_rgba(0,0,0,0.34)]"
+                style={{
+                  top: `calc(4.75rem + ${Math.min(i, 4) * 6}px)`,
+                  zIndex: 10 + i,
+                }}
               >
                 <div className="relative aspect-[1.25/1] overflow-hidden">
                   <Image

@@ -46,7 +46,7 @@ export default function ScrollHero() {
   const faceBoxMinHeight = (isMobile ? 430 : 660) - faceBoxProgress * (isMobile ? 160 : 260);
   const faceBoxAspect = (isMobile ? 0.72 : 0.68) + faceBoxProgress * (isMobile ? 0.46 : 0.76);
   const faceBoxTranslateY = isMobile
-    ? 4 + cardY - faceBoxProgress * 5
+    ? 8 + cardY - faceBoxProgress * 3
     : 10 + cardY - faceBoxProgress * 8;
 
   return (
@@ -169,7 +169,7 @@ export default function ScrollHero() {
         </div>
 
         <div
-          className="absolute inset-0 z-10 grid place-items-center pt-14 md:pt-8"
+          className="absolute inset-0 z-10 grid place-items-end justify-items-center pb-0 pt-14 md:place-items-center md:pb-0 md:pt-8"
           style={{ opacity: 1 }}
         >
           <div
@@ -201,6 +201,7 @@ export default function ScrollHero() {
               className="object-contain object-bottom"
               style={{
                 opacity: portraitOpacity * (1 - faceBoxProgress),
+                transform: isMobile ? "translateY(3.5%) scale(1.04)" : undefined,
               }}
             />
             <Image
@@ -211,7 +212,7 @@ export default function ScrollHero() {
               sizes="(min-width: 768px) 42vw, 92vw"
               className="object-cover"
               style={{
-                objectPosition: "50% 16%",
+                objectPosition: isMobile ? "50% 8%" : "50% 16%",
                 opacity: faceBoxProgress,
               }}
             />

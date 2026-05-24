@@ -61,6 +61,7 @@ export default function SkillsSection() {
 
   const [inView, setInView] = useState(false);
   const [dims, setDims]     = useState({ r1: 130, r2: 230, r3: 330 });
+  const [isMobile, setIsMobile] = useState(false);
 
   /* ── window-close scroll transition ── */
   useEffect(() => {
@@ -114,8 +115,14 @@ export default function SkillsSection() {
 
     const recalc = () => {
       const { width, height } = el.getBoundingClientRect();
-      const base = Math.min(width, height) * 0.78;
-      setDims({ r1: base * 0.20, r2: base * 0.37, r3: base * 0.50 });
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      const base = Math.min(width, height) * (mobile ? 0.90 : 0.78);
+      setDims(
+        mobile
+          ? { r1: base * 0.19, r2: base * 0.34, r3: base * 0.47 }
+          : { r1: base * 0.20, r2: base * 0.37, r3: base * 0.50 }
+      );
     };
 
     const obs = new IntersectionObserver(
@@ -263,23 +270,26 @@ export default function SkillsSection() {
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center select-none text-center">
           <div
             className="absolute rounded-full border border-[#1a100a]/8 bg-[#ede8e0]/60"
-            style={{ width: dims.r1 * 1.5, height: dims.r1 * 1.5 }}
+            style={{
+              width: dims.r1 * (isMobile ? 1.12 : 1.5),
+              height: dims.r1 * (isMobile ? 1.12 : 1.5),
+            }}
           />
           <div className="relative z-10 px-4">
-            <p className="text-[8px] font-black uppercase tracking-[0.28em] text-[#a73522]">Stack & Alat</p>
+            <p className="text-[7px] font-black uppercase tracking-[0.22em] text-[#a73522] md:text-[8px] md:tracking-[0.28em]">Stack & Alat</p>
             <h2
               className="mt-1 font-black uppercase leading-[0.84] text-[#1a100a]"
-              style={{ fontSize: "clamp(1rem, 2vw, 2.2rem)" }}
+              style={{ fontSize: isMobile ? "0.9rem" : "clamp(1rem, 2vw, 2.2rem)" }}
             >
               Teknologi
             </h2>
             <p
-              className="font-display text-[#a73522] leading-[0.9]"
-              style={{ fontSize: "clamp(0.9rem, 1.8vw, 2rem)", fontStyle: "italic" }}
+              className="font-display leading-[0.9] text-[#a73522]"
+              style={{ fontSize: isMobile ? "0.8rem" : "clamp(0.9rem, 1.8vw, 2rem)", fontStyle: "italic" }}
             >
               yang saya pakai.
             </p>
-            <p className="mt-2 text-[7px] font-black uppercase tracking-[0.22em] text-[#1a100a]/28">
+            <p className="mt-2 text-[6px] font-black uppercase tracking-[0.18em] text-[#1a100a]/28 md:text-[7px] md:tracking-[0.22em]">
               20 teknologi
             </p>
           </div>
@@ -300,7 +310,7 @@ export default function SkillsSection() {
 }
 
 function Chip({ chip, variant }: { chip: Skill; variant: "light" | "dark" | "gold" }) {
-  const base = "flex items-center gap-2 border px-3 py-2 whitespace-nowrap shadow-sm";
+  const base = "flex h-11 w-11 items-center justify-center border p-0 shadow-sm md:h-auto md:w-auto md:gap-2 md:px-3 md:py-2 md:whitespace-nowrap";
   const v = {
     light: "border-[#1a100a]/14 bg-white/95 text-[#1a100a]",
     dark:  "border-[#f7efe0]/10 bg-[#1a100a] text-[#f7efe0] shadow-md",
@@ -318,12 +328,12 @@ function Chip({ chip, variant }: { chip: Skill; variant: "light" | "dark" | "gol
             width={15}
             height={15}
             unoptimized
-            className={`h-[15px] w-[15px] object-contain ${variant === "dark" ? "brightness-[1.8] saturate-0" : ""}`}
+            className={`h-[14px] w-[14px] object-contain md:h-[15px] md:w-[15px] ${variant === "dark" ? "brightness-[1.8] saturate-0" : ""}`}
           />
         ))}
       </div>
-      <span className="text-[10px] font-black uppercase tracking-[0.1em]">{chip.label}</span>
-      <span className="font-display text-[9px] opacity-25">{chip.aksara}</span>
+      <span className="hidden text-[10px] font-black uppercase tracking-[0.1em] md:inline">{chip.label}</span>
+      <span className="hidden font-display text-[9px] opacity-25 md:inline">{chip.aksara}</span>
     </div>
   );
 }

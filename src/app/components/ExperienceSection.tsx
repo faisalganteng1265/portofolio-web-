@@ -207,13 +207,13 @@ export default function ExperienceSection() {
     const tlTop = tl.getBoundingClientRect().top + window.scrollY;
 
     featRefs.forEach((ref, i) => {
-      const el = ref.current;
+      const el = fmsRefs[i].current ?? ref.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
       featTrigYs.current[i] = r.top + window.scrollY - tlTop + r.height / 2;
     });
     srowRefs.forEach((ref, i) => {
-      const el = ref.current;
+      const el = smsRefs[i].current ?? ref.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
       srowTrigYs.current[i] = r.top + window.scrollY - tlTop + r.height / 2;
@@ -243,9 +243,17 @@ export default function ExperienceSection() {
   const dotYMV  = useMotionValue(LINE_PAD);
   const filledH = useTransform(dotYMV, v => Math.max(0, v - LINE_PAD));
 
-  useMotionValueEvent(smooth, "change", (progress) => {
-    const h   = timelineHRef.current;
-    const dot = LINE_PAD + progress * Math.max(0, h - 2 * LINE_PAD);
+  useMotionValueEvent(smooth, "change", () => {
+    const tl = timelineRef.current;
+    if (!tl) return;
+
+    const h = timelineHRef.current;
+    const rect = tl.getBoundingClientRect();
+    const viewportAnchor = window.innerHeight * 0.5;
+    const dot = Math.max(
+      LINE_PAD,
+      Math.min(h - LINE_PAD, viewportAnchor - rect.top)
+    );
     dotYMV.set(dot);
 
     featRefs.forEach((ref, i) => {
