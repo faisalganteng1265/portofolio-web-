@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Point = {
   x: number;
@@ -16,6 +17,22 @@ export default function AboutLanyard() {
   const lastPoint = useRef<Point | null>(null);
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setEntered(entry.isIntersecting);
+      },
+      { threshold: 0.42 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const card = {
     x: 200 + offset.x,
@@ -112,13 +129,17 @@ export default function AboutLanyard() {
       </svg>
 
       <div
-        className="absolute left-1/2 top-1/2 w-[min(58vw,15rem)] select-none"
+        className={`absolute left-1/2 top-1/2 w-[min(58vw,15rem)] select-none ${
+          entered && !dragging ? "lanyard-enter-swing" : ""
+        }`}
         style={{
+          "--lanyard-x": `${offset.x}px`,
+          "--lanyard-y": `${offset.y}px`,
           transform: `translate(calc(-50% + ${offset.x}px), calc(-39% + ${offset.y}px)) rotate(${offset.x * 0.035}deg)`,
           transition: dragging
             ? "none"
             : "transform 520ms cubic-bezier(.2,.8,.2,1)",
-        }}
+        } as CSSProperties}
       >
         <div className="overflow-hidden border border-[#d6a44b]/36 bg-[#100d0a]/92 shadow-[0_28px_70px_rgba(0,0,0,0.46)] backdrop-blur-md">
           <div className="relative aspect-[4/3] border-b border-[#d6a44b]/20 bg-[#f7efe0]">

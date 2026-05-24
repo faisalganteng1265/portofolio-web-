@@ -55,6 +55,110 @@ h1, h2, h3 {
 .reveal:nth-child(4) { animation-range: entry 12% entry 34%; }
 .reveal:nth-child(5) { animation-range: entry 16% entry 36%; }
 
+/* ─── ABOUT ENTRANCE ────────────────────────── */
+@keyframes about-rise {
+  from {
+    opacity: 0;
+    transform: translateY(64px) scale(0.96);
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes about-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes about-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(80px) skewY(3deg);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) skewY(0deg);
+    filter: blur(0);
+  }
+}
+
+.about-reveal {
+  opacity: 0;
+}
+
+.about-reveal-line {
+  opacity: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.about-reveal-sub {
+  opacity: 0;
+}
+
+[data-about-in] .about-reveal {
+  animation: about-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--about-delay, 0ms);
+}
+
+[data-about-in] .about-reveal-line {
+  animation: about-line-in 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--about-delay, 0ms);
+}
+
+[data-about-in] .about-reveal-sub {
+  animation: about-slide-up 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--about-delay, 0ms);
+}
+
+@keyframes about-bg-fade {
+  from { opacity: 0; }
+  to   { opacity: 0.018; }
+}
+
+.about-bg-num {
+  opacity: 0;
+}
+
+[data-about-in] .about-bg-num {
+  animation: about-bg-fade 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 80ms;
+}
+
+@keyframes lanyard-swing-in {
+  0% {
+    transform: translate(calc(-50% + var(--lanyard-x, 0px)), calc(-39% + var(--lanyard-y, 0px))) rotate(-10deg);
+  }
+  38% {
+    transform: translate(calc(-50% + var(--lanyard-x, 0px)), calc(-39% + var(--lanyard-y, 0px))) rotate(7deg);
+  }
+  64% {
+    transform: translate(calc(-50% + var(--lanyard-x, 0px)), calc(-39% + var(--lanyard-y, 0px))) rotate(-3.5deg);
+  }
+  82% {
+    transform: translate(calc(-50% + var(--lanyard-x, 0px)), calc(-39% + var(--lanyard-y, 0px))) rotate(1.6deg);
+  }
+  100% {
+    transform: translate(calc(-50% + var(--lanyard-x, 0px)), calc(-39% + var(--lanyard-y, 0px))) rotate(0deg);
+  }
+}
+
+.lanyard-enter-swing {
+  animation: lanyard-swing-in 1250ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  transform-origin: 50% -34%;
+}
+
 /* ─── SCROLL MARQUEE ────────────────────────── */
 @keyframes marquee {
   from { transform: translateX(0); }
