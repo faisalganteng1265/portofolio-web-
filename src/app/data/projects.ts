@@ -25,4 +25,5 @@ export const projectList: Project[] = [
   { num: "12", title: "Sinauin",   type: "Learn AI, Automate Everything",        tags: ["Next.js", "Tailwind", "Supabase", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/sinauin.jpeg",     href: "#" },
   { num: "13", title: "Esize",   type: "Konveksi Cerdas, Karya Mahasiswa",        tags: ["Next.js", "Tailwind", "Supabase", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/esize.png",     href: "#" },
   { num: "14", title: "Bin Auf Coffee",   type: "Fresh Coffee, Easy Ordering",        tags: ["Kotlin", "Laravel", "Web2"],                    accent: "#d6a44b", featured: false, image: "/projects/binauf.jpeg",     href: "#" },
+  { num: "15", title: "Equinox",   type: "AI Yield Optimizer",        tags: ["Next.js", "Tailwind", "AI", "Web3"],                    accent: "#a73522", featured: false, image: "/projects/shield.png",     href: "#" },
 ];
