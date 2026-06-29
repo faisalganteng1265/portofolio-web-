@@ -110,6 +110,7 @@ export default function AchievementsSection() {
 
   // ── main animation loop ────────────────────────────────────────────────────
   useMotionValueEvent(smooth, "change", (progress) => {
+    if (window.innerWidth < 768) return;
     const timelineH = timelineHRef.current;
     const dot = LINE_PAD + progress * Math.max(0, timelineH - 2 * LINE_PAD);
     dotYMV.set(dot);
@@ -169,6 +170,15 @@ export default function AchievementsSection() {
     return () => { tl.kill(); };
   }, []);
 
+  // Mobile: bypass GSAP opacity — show cards fully visible
+  useEffect(() => {
+    if (window.innerWidth >= 768) return;
+    [...leftRefs, ...rightRefs].forEach(r => {
+      if (r.current) r.current.style.opacity = "1";
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <section
@@ -210,7 +220,7 @@ export default function AchievementsSection() {
             {[["4", "Penghargaan"], ["2", "Bootcamp"]].map(([n, l]) => (
               <div key={l} className="lg:text-right">
                 <p className="text-[2.6rem] font-black leading-none text-[#d6a44b]">{n}</p>
-                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.2em] text-[#4b3f30]">{l}</p>
+                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.2em] text-[#6b5f4f] md:text-[#4b3f30]">{l}</p>
               </div>
             ))}
           </div>
@@ -222,7 +232,7 @@ export default function AchievementsSection() {
             {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
               <span
                 key={i}
-                className="mx-14 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#3b3028]"
+                className="mx-14 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#8d8170] md:text-[#3b3028]"
               >
                 <span className="mr-4 text-[#d6a44b]/40">ꦱ</span>
                 {item}
@@ -334,7 +344,7 @@ export default function AchievementsSection() {
                     <span className="border border-[#d6a44b]/35 bg-[#1e1508]/80 px-3.5 py-1.5 text-[8px] font-black uppercase tracking-[0.22em] text-[#d6a44b] backdrop-blur-sm">
                       2025 · Base Build Hackathon
                     </span>
-                    <span className="text-[8px] font-black uppercase tracking-[0.18em] text-[#4b3f30]">
+                    <span className="text-[8px] font-black uppercase tracking-[0.18em] text-[#6b5f4f] md:text-[#4b3f30]">
                       Base · Coinbase
                     </span>
                   </div>
@@ -344,7 +354,7 @@ export default function AchievementsSection() {
                     <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
                       <div>
                         <p className="text-base font-black text-[#c9b99d]">Winner · Global Competition</p>
-                        <p className="mt-1 max-w-[36ch] text-xs font-medium leading-6 text-[#5a4f40]">
+                        <p className="mt-1 max-w-[36ch] text-xs font-medium leading-6 text-[#8d8170] md:text-[#5a4f40]">
                           Salah satu dari 50 tim terbaik di hackathon global Base yang diselenggarakan oleh Coinbase.
                         </p>
                       </div>
@@ -394,13 +404,13 @@ export default function AchievementsSection() {
                     <span className="border border-[#d6a44b]/25 bg-[#100e0c]/70 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.2em] text-[#d6a44b]/70 backdrop-blur-sm">
                       Juara 1 · Pertama
                     </span>
-                    <span className="text-[7px] font-black uppercase tracking-[0.18em] text-[#3b3028]">2025</span>
+                    <span className="text-[7px] font-black uppercase tracking-[0.18em] text-[#8d8170] md:text-[#3b3028]">2025</span>
                   </div>
                   <div>
                     <p className="font-black leading-none text-[#d6a44b]" style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>Juara</p>
                     <p className="font-black leading-[0.82] text-[#fff7ea]" style={{ fontSize: "clamp(5rem, 13vw, 10rem)" }}>1</p>
                     <p className="mt-2 text-xl font-black leading-[1.12] text-[#c9b99d]">Web Design Competition</p>
-                    <p className="mt-1.5 text-[10px] font-medium text-[#5a4f40]">Universitas Teknokrat Indonesia</p>
+                    <p className="mt-1.5 text-[10px] font-medium text-[#8d8170] md:text-[#5a4f40]">Universitas Teknokrat Indonesia</p>
                     <span className="mt-3 inline-block border border-[#f7efe0]/10 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#3b3028]">Design</span>
                   </div>
                 </div>
@@ -438,16 +448,16 @@ export default function AchievementsSection() {
                     <span className="border border-[#a73522]/30 bg-[#0d0b09]/70 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.2em] text-[#a73522]/75 backdrop-blur-sm">
                       Juara 3 · Ketiga
                     </span>
-                    <span className="text-[7px] font-black uppercase tracking-[0.18em] text-[#3b3028]">2025</span>
+                    <span className="text-[7px] font-black uppercase tracking-[0.18em] text-[#8d8170] md:text-[#3b3028]">2025</span>
                   </div>
                   <div>
                     <p className="font-black leading-none text-[#a73522]" style={{ fontSize: "clamp(2rem, 4.5vw, 4rem)" }}>Juara</p>
                     <p className="font-black leading-[0.82] text-[#fff7ea]" style={{ fontSize: "clamp(4.5rem, 11vw, 9rem)" }}>3</p>
                     <p className="mt-2 text-lg font-black leading-[1.12] text-[#c9b99d]">Hackathon Base Indonesia</p>
-                    <p className="mt-1.5 text-[10px] font-medium text-[#5a4f40]">Base Indonesia Community</p>
+                    <p className="mt-1.5 text-[10px] font-medium text-[#8d8170] md:text-[#5a4f40]">Base Indonesia Community</p>
                     <div className="mt-3 flex gap-1.5">
                       {["Blockchain", "Web3"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#3b3028]">{t}</span>
+                        <span key={t} className="border border-[#f7efe0]/10 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
                       ))}
                     </div>
                   </div>
@@ -494,12 +504,12 @@ export default function AchievementsSection() {
                     <p className="font-black leading-[1.05] text-[#fff7ea]" style={{ fontSize: "clamp(1.6rem, 3.8vw, 3rem)" }}>
                       Lisk Builder<br />Program 2
                     </p>
-                    <p className="mt-2 text-sm font-medium text-[#5a4f40]">
+                    <p className="mt-2 text-sm font-medium text-[#8d8170] md:text-[#5a4f40]">
                       Dipilih sebagai proyek paling disukai komunitas · Lisk · 2025
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {["Community Choice", "Lisk L2", "Blockchain"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-3.5 py-1.5 text-[7px] font-black uppercase tracking-[0.16em] text-[#3b3028]">{t}</span>
+                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-3.5 py-1.5 text-[7px] font-black uppercase tracking-[0.16em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
                       ))}
                     </div>
                   </div>
@@ -524,7 +534,7 @@ export default function AchievementsSection() {
             {/* center spacer (keeps line visible through sub-header) */}
             <div className="hidden lg:block" />
             <div className="hidden items-end justify-end border-b border-[#f7efe0]/8 pb-6 lg:flex">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#3b3028]">2025 · Jogja</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8d8170] md:text-[#3b3028]">2025 · Jogja</p>
             </div>
           </div>
 
@@ -554,13 +564,13 @@ export default function AchievementsSection() {
                 <div className="p-6 lg:p-7 transition-all duration-500 group-hover:blur-sm">
                   <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b]/60">September – Oktober 2025</p>
                   <h3 className="mt-2 text-2xl font-black text-[#fff7ea]">Base Indonesia</h3>
-                  <p className="mt-1.5 text-sm font-medium leading-6 text-[#5a4f40]">
+                  <p className="mt-1.5 text-sm font-medium leading-6 text-[#8d8170] md:text-[#5a4f40]">
                     Workshop intensif Web3 di Jogja bersama komunitas Base Indonesia, mengeksplorasi pengembangan smart contract dan ekosistem Layer 2.
                   </p>
                   <div className="mt-5 flex items-center justify-between gap-4">
                     <div className="flex flex-wrap gap-1.5">
                       {["Web3", "Smart Contract", "Base L2"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#3b3028]">{t}</span>
+                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
                       ))}
                     </div>
                     <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.18em] text-[#2e2620]">ꦗꦒꦗ</span>
@@ -600,13 +610,13 @@ export default function AchievementsSection() {
                 <div className="p-6 lg:p-7 transition-all duration-500 group-hover:blur-sm">
                   <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b]/60">November – Desember 2025</p>
                   <h3 className="mt-2 text-2xl font-black text-[#fff7ea]">Dev Web3 Jogja</h3>
-                  <p className="mt-1.5 text-sm font-medium leading-6 text-[#5a4f40]">
+                  <p className="mt-1.5 text-sm font-medium leading-6 text-[#8d8170] md:text-[#5a4f40]">
                     Bootcamp full-stack Web3 di Yogyakarta, membangun aplikasi terdesentralisasi dari dasar hingga deployment ke mainnet.
                   </p>
                   <div className="mt-5 flex items-center justify-between gap-4">
                     <div className="flex flex-wrap gap-1.5">
                       {["DeFi", "Solidity", "dApp"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#3b3028]">{t}</span>
+                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
                       ))}
                     </div>
                     <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.18em] text-[#2e2620]">ꦗꦒꦗ</span>

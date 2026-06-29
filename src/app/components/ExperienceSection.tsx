@@ -244,6 +244,7 @@ export default function ExperienceSection() {
   const filledH = useTransform(dotYMV, v => Math.max(0, v - LINE_PAD));
 
   useMotionValueEvent(smooth, "change", () => {
+    if (window.innerWidth < 768) return;
     const tl = timelineRef.current;
     if (!tl) return;
 
@@ -297,6 +298,15 @@ export default function ExperienceSection() {
       { scaleY: 1, opacity: 0,   duration: 0.55, ease: "power2.out" }
     );
     return () => { tl.kill(); };
+  }, []);
+
+  // Mobile: bypass GSAP opacity — show cards fully visible
+  useEffect(() => {
+    if (window.innerWidth >= 768) return;
+    [...featRefs, ...srowRefs].forEach(r => {
+      if (r.current) r.current.style.opacity = "1";
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── section bg parallax ────────────────────────────────────────────────────
@@ -366,7 +376,7 @@ export default function ExperienceSection() {
               {[["7", "Pengalaman"], ["2", "Spotlight"], ["2024–25", "Timeline"]].map(([n, l]) => (
                 <div key={l}>
                   <p className="text-[2.2rem] font-black leading-none text-[#d6a44b]">{n}</p>
-                  <p className="mt-1 text-[8px] font-black uppercase tracking-[0.2em] text-[#4b3f30]">{l}</p>
+                  <p className="mt-1 text-[8px] font-black uppercase tracking-[0.2em] text-[#6b5f4f] md:text-[#4b3f30]">{l}</p>
                 </div>
               ))}
             </div>
@@ -382,7 +392,7 @@ export default function ExperienceSection() {
             {[...MARQUEE_ROLES, ...MARQUEE_ROLES].map((item, i) => (
               <span
                 key={i}
-                className="mx-12 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#3b3028]"
+                className="mx-12 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#8d8170] md:text-[#3b3028]"
               >
                 <span className="mr-4 text-[#d6a44b]/40">ꦱ</span>
                 {item}
@@ -543,7 +553,7 @@ export default function ExperienceSection() {
                       >
                         <div>
                           <div className="mb-4 flex items-start justify-between gap-4">
-                            <p className="max-w-[42ch] text-[0.65rem] font-black uppercase tracking-[0.12em] text-[#6f6251]">
+                            <p className="max-w-[42ch] text-[0.65rem] font-black uppercase tracking-[0.12em] text-[#8d8170] md:text-[#6f6251]">
                               {exp.company}
                             </p>
                             <p
@@ -589,7 +599,7 @@ export default function ExperienceSection() {
             </div>
             <p className="shrink-0 text-sm font-black text-[#fff7ea]">Leadership & Organization</p>
             <div className="h-px flex-1 bg-[#f7efe0]/10" />
-            <p className="hidden text-[7px] font-black uppercase tracking-[0.22em] text-[#4b3f30] sm:block">
+            <p className="hidden text-[7px] font-black uppercase tracking-[0.22em] text-[#6b5f4f] md:text-[#4b3f30] sm:block">
               {SUPPORTING.length} entries
             </p>
           </motion.div>
@@ -646,10 +656,10 @@ export default function ExperienceSection() {
                             {exp.roleLines.join(" ")}
                           </h3>
                         </div>
-                        <p className="mt-0.5 text-[0.63rem] font-black uppercase tracking-[0.1em] text-[#4b3f30]">
+                        <p className="mt-0.5 text-[0.63rem] font-black uppercase tracking-[0.1em] text-[#6b5f4f] md:text-[#4b3f30]">
                           {exp.company}
                         </p>
-                        <p className="mt-2 max-w-[68ch] text-[0.72rem] font-medium leading-[1.75] text-[#5a4f40]">
+                        <p className="mt-2 max-w-[68ch] text-[0.72rem] font-medium leading-[1.75] text-[#8d8170] md:text-[#5a4f40]">
                           {exp.desc}
                         </p>
                       </div>
