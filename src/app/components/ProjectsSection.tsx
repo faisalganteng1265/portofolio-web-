@@ -232,7 +232,7 @@ export default function ProjectsSection() {
                     alt={project.title}
                     fill
                     sizes="100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    className="object-cover transition-all duration-500 group-hover:scale-[1.04] group-hover:blur-sm"
                     priority={i < 2}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#130f0b] via-[#130f0b]/10 to-transparent" />
@@ -249,6 +249,19 @@ export default function ProjectsSection() {
                   >
                     {stack}
                   </span>
+                  <a
+                    href={project.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  >
+                    <p className="text-center text-sm font-semibold leading-snug text-white">
+                      {project.description}
+                    </p>
+                    <span className="border border-white/40 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/80">
+                      Lihat Project →
+                    </span>
+                  </a>
                 </div>
 
                 <div className="relative p-5">
@@ -320,7 +333,7 @@ export default function ProjectsSection() {
                       alt={project.title}
                       fill
                       sizes="440px"
-                      className="object-cover transition-all duration-500 group-hover:scale-[1.04]"
+                      className="object-cover transition-all duration-500 group-hover:scale-[1.04] group-hover:blur-sm"
                       priority={i < 3}
                     />
                     {project.featured && (
@@ -328,6 +341,19 @@ export default function ProjectsSection() {
                         Featured
                       </div>
                     )}
+                    <a
+                      href={project.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    >
+                      <p className="text-center text-sm font-semibold leading-snug text-white">
+                        {project.description}
+                      </p>
+                      <span className="border border-white/40 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/80">
+                        Lihat Project →
+                      </span>
+                    </a>
                   </div>
 
                   {/* ── teks di kanan card ── */}
