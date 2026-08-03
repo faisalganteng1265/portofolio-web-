@@ -1,185 +1,463 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
+  AnimatePresence,
   motion,
+  useMotionValue,
+  useReducedMotion,
   useScroll,
   useSpring,
-  useMotionValue,
   useTransform,
-  useMotionValueEvent,
 } from "framer-motion";
-import gsap from "gsap";
+import {
+  achievementFilters,
+  achievements,
+  type Achievement,
+  type AchievementFilter,
+} from "../data/achievements";
+import OrgLogo from "./OrgLogo";
+import { Counter, EASE, Words } from "./RevealBits";
 
-// ── constants ─────────────────────────────────────────────────────────────────
+const TILT_SPRING = { stiffness: 210, damping: 20, mass: 0.5 };
+
 const MARQUEE_ITEMS = [
-  "ꦗ  Juara 1 — Web Design Competition UTI",
-  "ꦤ  Juara 3 — Hackathon Base Indonesia",
-  "ꦒ  Top 50 Global — Base Build Hackathon",
-  "ꦭ  Most Favorite — Lisk Builder Program 2",
+  "Juara 1 · Web Design Competition UTI",
+  "Top 50 Global · Base Build Hackathon",
+  "Juara 3 · Hackathon Base Indonesia",
+  "Most Favorite · Lisk Builder Program 2",
+  "Batch 2 · Base Indonesia Workshop",
+  "Batch 5 · Dev Web3 Jogja",
 ];
 
-const LINE_PAD       = 72;   // px — line inset from section top/bottom
-const PART_THRESHOLD = 360;  // px — radius where cards start parting
-const MAX_SHIFT      = 56;   // px — max horizontal card shift
+// ── medali peringkat ─────────────────────────────────────────────────────────
+function Medal({ item, compact }: { item: Achievement; compact?: boolean }) {
+  return (
+    <div
+      className="medal relative overflow-hidden px-4 pb-3 pt-2.5"
+      style={{
+        border: `1px solid ${item.accent}45`,
+        background: `linear-gradient(150deg, ${item.accent}1f, rgba(11,9,7,0.75) 62%)`,
+        clipPath:
+          "polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px))",
+      }}
+    >
+      <span aria-hidden className="medal-sheen pointer-events-none absolute inset-0" />
+      <span
+        className="relative block text-[8px] font-black uppercase tracking-[0.3em]"
+        style={{ color: item.accent }}
+      >
+        {item.rankTop}
+      </span>
+      <span
+        className="relative block font-black leading-[0.82] text-[#fff7ea]"
+        style={{ fontSize: compact ? "clamp(1.9rem, 3.4vw, 2.6rem)" : "clamp(2.4rem, 4.6vw, 3.8rem)" }}
+      >
+        {item.rankMain}
+      </span>
+    </div>
+  );
+}
 
-// ── component ─────────────────────────────────────────────────────────────────
-export default function AchievementsSection() {
-  const sectionRef  = useRef<HTMLElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const dotRef      = useRef<HTMLDivElement>(null);
-  const timelineHRef = useRef(1600);
+// ── kartu ────────────────────────────────────────────────────────────────────
+function AchievementCard({
+  item,
+  index,
+  onOpen,
+}: {
+  item: Achievement;
+  index: number;
+  onOpen: (id: string) => void;
+}) {
+  const reduce = useReducedMotion();
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  // ── per-row refs (3 rows: achievement A, achievement B, bootcamp) ──────────
-  const row0 = useRef<HTMLDivElement>(null);
-  const row1 = useRef<HTMLDivElement>(null);
-  const row2 = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const rotateX = useSpring(useTransform(my, [0, 1], [5.5, -5.5]), TILT_SPRING);
+  const rotateY = useSpring(useTransform(mx, [0, 1], [-6.5, 6.5]), TILT_SPRING);
+  // Sorot digerakkan lewat transform (dikomposisi GPU), bukan dengan menulis
+  // ulang radial-gradient tiap frame — itu memaksa repaint sebesar kartu.
+  const glowX = useSpring(0, TILT_SPRING);
+  const glowY = useSpring(0, TILT_SPRING);
 
-  const left0 = useRef<HTMLDivElement>(null);
-  const left1 = useRef<HTMLDivElement>(null);
-  const left2 = useRef<HTMLDivElement>(null);
+  const isWide = item.span.includes("col-span-4");
 
-  const right0 = useRef<HTMLDivElement>(null);
-  const right1 = useRef<HTMLDivElement>(null);
-  const right2 = useRef<HTMLDivElement>(null);
-
-  const ms0 = useRef<HTMLDivElement>(null); // milestone dots
-  const ms1 = useRef<HTMLDivElement>(null);
-  const ms2 = useRef<HTMLDivElement>(null);
-
-  const rowRefs   = useMemo(() => [row0,   row1,   row2],   []);
-  const leftRefs  = useMemo(() => [left0,  left1,  left2],  []);
-  const rightRefs = useMemo(() => [right0, right1, right2], []);
-  const msRefs    = useMemo(() => [ms0,    ms1,    ms2],    []);
-
-  // ── trigger Y positions (milestone-relative → timeline-relative px) ─────────
-  const triggerYsRef = useRef<number[]>([99999, 99999, 99999]);
-
-  const computeTimelineMetrics = useCallback(() => {
-    const timeline = timelineRef.current;
-    if (!timeline) return;
-
-    timelineHRef.current = timeline.offsetHeight;
-    const timelineDocTop = timeline.getBoundingClientRect().top + window.scrollY;
-
-    msRefs.forEach((msRef, i) => {
-      const milestone = msRef.current;
-      const row = rowRefs[i].current;
-      const milestoneRect = milestone?.getBoundingClientRect();
-      const target = milestoneRect && milestoneRect.height > 0 ? milestone : row;
-      if (!target) return;
-
-      const rect = target.getBoundingClientRect();
-      const docTop = rect.top + window.scrollY;
-      triggerYsRef.current[i] = docTop - timelineDocTop + rect.height / 2;
-    });
-  }, [msRefs, rowRefs]);
-
-  // ── timeline height + trigger tracking ───────────────────────────────────
-  useEffect(() => {
-    const el = timelineRef.current;
+  const handleMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Di layar sentuh, pointermove ikut terpicu saat scroll — itu bikin 6 kartu
+    // menghitung tilt bersamaan persis ketika frame paling dibutuhkan.
+    if (reduce || e.pointerType !== "mouse") return;
+    const el = cardRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => {
-      computeTimelineMetrics();
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [computeTimelineMetrics]);
+    const r = el.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width);
+    my.set((e.clientY - r.top) / r.height);
+    glowX.set(e.clientX - r.left);
+    glowY.set(e.clientY - r.top);
+  };
 
+  const recenter = () => {
+    mx.set(0.5);
+    my.set(0.5);
+  };
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 34, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -18, scale: 0.96 }}
+      transition={{ duration: 0.55, delay: Math.min(index, 5) * 0.05, ease: EASE }}
+      className={`${item.span} [perspective:1400px]`}
+    >
+      <motion.article
+        ref={cardRef}
+        onPointerMove={handleMove}
+        onPointerLeave={recenter}
+        style={{ rotateX, rotateY }}
+        whileHover={reduce ? undefined : { y: -6 }}
+        transition={{ duration: 0.28, ease: EASE }}
+        className={`group relative h-full overflow-hidden border border-[#f7efe0]/10 bg-[#0b0907] ${item.height}`}
+      >
+        {/* foto — tetap terbaca, makin jelas saat hover.
+            Hanya opacity + transform yang dianimasikan; filter seperti saturate
+            memaksa repaint gambar sebesar kartu tiap frame. */}
+        <div className="absolute inset-0">
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            sizes="(min-width: 1024px) 55vw, (min-width: 768px) 50vw, 92vw"
+            className="object-cover opacity-[0.38] transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.05] group-hover:opacity-[0.72]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0907] via-[#0b0907]/88 to-[#0b0907]/35" />
+          {isWide && (
+            <div className="absolute inset-0 hidden bg-gradient-to-r from-[#0b0907] via-[#0b0907]/45 to-transparent lg:block" />
+          )}
+        </div>
+
+        {/* sorot mengikuti kursor — gradien statis yang digeser transform */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute left-0 top-0 h-[420px] w-[420px] rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{
+            x: glowX,
+            y: glowY,
+            marginLeft: -210,
+            marginTop: -210,
+            background: `radial-gradient(circle, ${item.accent}2b, transparent 70%)`,
+          }}
+        />
+
+        {/* garis aksen atas */}
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 h-[2px] w-full origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
+          style={{ background: `linear-gradient(to right, ${item.accent}, transparent 78%)` }}
+        />
+
+        {/* siku sudut yang memanjang saat hover */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-3 top-3 h-4 w-4 border-r border-t transition-all duration-500 group-hover:h-7 group-hover:w-7"
+          style={{ borderColor: `${item.accent}55` }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-3 left-3 h-4 w-4 border-b border-l transition-all duration-500 group-hover:h-7 group-hover:w-7"
+          style={{ borderColor: `${item.accent}55` }}
+        />
+
+        {/* aksara latar */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-4 bottom-[-3rem] select-none font-black leading-none transition-transform duration-[900ms] ease-out group-hover:-translate-y-3"
+          style={{ color: item.accent, opacity: 0.07, fontSize: isWide ? "16rem" : "11rem" }}
+        >
+          {item.aksara}
+        </span>
+
+        {/* isi */}
+        <div className="relative flex h-full flex-col justify-between gap-8 p-6 md:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <Medal item={item} compact={!isWide} />
+            <div className="flex flex-col items-end gap-2">
+              <span
+                className="border px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em]"
+                style={{
+                  borderColor: `${item.accent}3d`,
+                  background: `${item.accent}14`,
+                  color: item.accent,
+                }}
+              >
+                {item.kind === "bootcamp" ? "Bootcamp" : "Kompetisi"}
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#8d8170]">
+                {item.year}
+              </span>
+            </div>
+          </div>
+
+          <div className={isWide ? "max-w-[46ch]" : ""}>
+            <h3
+              className="font-black leading-[1.02] text-[#fff7ea]"
+              style={{ fontSize: isWide ? "clamp(1.7rem, 3.1vw, 2.8rem)" : "clamp(1.25rem, 2.1vw, 1.7rem)" }}
+            >
+              {item.title}
+            </h3>
+
+            <div className="mt-4 flex items-center gap-3.5">
+              <OrgLogo
+                src={item.logo}
+                alt={item.org}
+                fallback={item.aksara}
+                accent={item.accent}
+                size={isWide ? 68 : 56}
+              />
+              <div className="min-w-0">
+                <p className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-[#c9b99d]">
+                  {item.org}
+                </p>
+                <p className="mt-0.5 truncate text-[9px] font-black uppercase tracking-[0.18em] text-[#8d8170]">
+                  {item.issuer} · {item.period}
+                </p>
+              </div>
+            </div>
+
+            <p
+              className={`mt-4 text-[13px] font-medium leading-[1.75] text-[#a2937d] ${
+                isWide ? "line-clamp-3" : "line-clamp-2"
+              }`}
+            >
+              {item.desc}
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-1.5">
+              {item.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="border border-[#f7efe0]/12 bg-[#f7efe0]/[0.04] px-2.5 py-1 text-[7.5px] font-black uppercase tracking-[0.16em] text-[#a2937d]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <span
+              className="mt-5 inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.22em] transition-all duration-300 group-hover:gap-3.5"
+              style={{ color: item.accent }}
+            >
+              Lihat detail
+              <span aria-hidden>→</span>
+            </span>
+          </div>
+        </div>
+
+        {/* target klik menutupi seluruh kartu */}
+        <button
+          type="button"
+          onClick={() => onOpen(item.id)}
+          className="absolute inset-0 z-20 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#d6a44b] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0c0a]"
+        >
+          <span className="sr-only">Buka detail {item.title}</span>
+        </button>
+      </motion.article>
+    </motion.div>
+  );
+}
+
+// ── lightbox ─────────────────────────────────────────────────────────────────
+function Lightbox({ item, onClose }: { item: Achievement; onClose: () => void }) {
   useEffect(() => {
-    const t = setTimeout(computeTimelineMetrics, 300);
-    window.addEventListener("resize", computeTimelineMetrics);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("resize", computeTimelineMetrics);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
-  }, [computeTimelineMetrics]);
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      root.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
 
-  // ── scroll tracking ────────────────────────────────────────────────────────
+  return (
+    <motion.div
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.title}
+    >
+      <motion.button
+        type="button"
+        aria-label="Tutup"
+        onClick={onClose}
+        className="absolute inset-0 cursor-default bg-[#050403]/88 backdrop-blur-md"
+      />
+
+      <motion.div
+        data-lenis-prevent
+        initial={{ opacity: 0, y: 26, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 18, scale: 0.98 }}
+        transition={{ duration: 0.42, ease: EASE }}
+        className="relative z-10 grid max-h-[88vh] w-full max-w-5xl overflow-y-auto border border-[#f7efe0]/12 bg-[#0d0b09] lg:grid-cols-[1.15fr_0.85fr] lg:overflow-hidden"
+        style={{ boxShadow: "0 40px 120px rgba(0,0,0,0.6)" }}
+      >
+        <div className="relative min-h-[240px] bg-[#080706] lg:min-h-[520px]">
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            sizes="(min-width: 1024px) 55vw, 92vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09]/80 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-[#0d0b09]/70" />
+          <div className="absolute left-5 top-5">
+            <Medal item={item} />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6 p-6 md:p-9">
+          <div className="flex items-start justify-between gap-4">
+            <span
+              className="border px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.22em]"
+              style={{
+                borderColor: `${item.accent}44`,
+                background: `${item.accent}16`,
+                color: item.accent,
+              }}
+            >
+              {item.kind === "bootcamp" ? "Bootcamp" : "Kompetisi"}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="grid h-8 w-8 shrink-0 place-items-center border border-[#f7efe0]/15 text-[#c9b99d] transition-colors hover:border-[#d6a44b]/60 hover:text-[#d6a44b]"
+              aria-label="Tutup detail"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div>
+            <h3
+              className="font-black leading-[1.04] text-[#fff7ea]"
+              style={{ fontSize: "clamp(1.7rem, 3vw, 2.5rem)" }}
+            >
+              {item.title}
+            </h3>
+            <div className="mt-5 flex items-center gap-3.5">
+              <OrgLogo
+                src={item.logo}
+                alt={item.org}
+                fallback={item.aksara}
+                accent={item.accent}
+                size={72}
+              />
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#c9b99d]">
+                  {item.org}
+                </p>
+                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#8d8170]">
+                  {item.issuer}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-[#f7efe0]/10" />
+
+          <p className="text-sm font-medium leading-[1.9] text-[#a2937d]">{item.desc}</p>
+
+          <dl className="grid grid-cols-2 gap-4">
+            <div>
+              <dt className="text-[8px] font-black uppercase tracking-[0.22em] text-[#6b5f4f]">
+                Periode
+              </dt>
+              <dd className="mt-1.5 text-xs font-black text-[#c9b99d]">{item.period}</dd>
+            </div>
+            <div>
+              <dt className="text-[8px] font-black uppercase tracking-[0.22em] text-[#6b5f4f]">
+                Capaian
+              </dt>
+              <dd className="mt-1.5 text-xs font-black" style={{ color: item.accent }}>
+                {item.rankTop} {item.rankMain}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="mt-auto flex flex-wrap gap-1.5">
+            {item.tags.map((tag) => (
+              <span
+                key={tag}
+                className="border border-[#f7efe0]/12 bg-[#f7efe0]/[0.04] px-2.5 py-1 text-[7.5px] font-black uppercase tracking-[0.16em] text-[#a2937d]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── section ──────────────────────────────────────────────────────────────────
+export default function AchievementsSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [filter, setFilter] = useState<AchievementFilter>("semua");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  // Portal baru dibuat setelah interaksi pertama, jadi `document` dijamin ada
+  // dan AnimatePresence tetap punya host untuk animasi keluar.
+  const [portalReady, setPortalReady] = useState(false);
+
+  const openCard = useCallback((id: string) => {
+    setPortalReady(true);
+    setActiveId(id);
+  }, []);
+
+  const closeCard = useCallback(() => setActiveId(null), []);
+
+  const visible = useMemo(
+    () => (filter === "semua" ? achievements : achievements.filter((a) => a.kind === filter)),
+    [filter]
+  );
+
+  const counts = useMemo(
+    () => ({
+      semua: achievements.length,
+      kompetisi: achievements.filter((a) => a.kind === "kompetisi").length,
+      bootcamp: achievements.filter((a) => a.kind === "bootcamp").length,
+    }),
+    []
+  );
+
+  const activeItem = activeId ? achievements.find((a) => a.id === activeId) ?? null : null;
+
+  // Ikut otomatis kalau tahun di data berubah.
+  const yearSpan = useMemo(() => {
+    const years = [...new Set(achievements.map((a) => a.year))].sort();
+    return years.length > 1
+      ? `Capaian ${years[0]}–${years[years.length - 1]}`
+      : `Semua capaian diraih di ${years[0]}`;
+  }, []);
+
+  // parallax watermark
   const { scrollYProgress } = useScroll({
-    target: timelineRef,
-    offset: ["start center", "end center"],
+    target: sectionRef,
+    offset: ["start end", "end start"],
   });
+  const bgY = useTransform(scrollYProgress, [0, 1], [-70, 70]);
+  const railScale = useTransform(scrollYProgress, [0.08, 0.9], [0, 1]);
 
-  const smooth = useSpring(scrollYProgress, { stiffness: 78, damping: 21, restDelta: 0.001 });
-
-  // ── dot Y MotionValue (px from section top) ────────────────────────────────
-  const dotYMV  = useMotionValue(LINE_PAD);
-  const filledH = useTransform(dotYMV, v => Math.max(0, v - LINE_PAD));
-
-  // ── main animation loop ────────────────────────────────────────────────────
-  useMotionValueEvent(smooth, "change", (progress) => {
-    if (window.innerWidth < 768) return;
-    const timelineH = timelineHRef.current;
-    const dot = LINE_PAD + progress * Math.max(0, timelineH - 2 * LINE_PAD);
-    dotYMV.set(dot);
-
-    const isDesktop = window.innerWidth >= 1024;
-
-    rowRefs.forEach((_, i) => {
-      const triggerY = triggerYsRef.current[i];
-      const dist      = Math.abs(dot - triggerY);
-      const prox      = Math.max(0, 1 - dist / PART_THRESHOLD);
-
-      const lEl  = leftRefs[i].current;
-      const rEl  = rightRefs[i].current;
-      const msEl = msRefs[i].current;
-
-      if (lEl) {
-        gsap.to(lEl, {
-          ...(isDesktop ? { x: -prox * MAX_SHIFT } : {}),
-          opacity: 0.32 + prox * 0.68,
-          duration: 0.55,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      }
-
-      if (rEl) {
-        gsap.to(rEl, {
-          ...(isDesktop ? { x: prox * MAX_SHIFT } : {}),
-          opacity: 0.32 + prox * 0.68,
-          duration: 0.55,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      }
-
-      if (msEl) {
-        gsap.to(msEl, {
-          scale:   1 + prox * 1.2,
-          opacity: 0.18 + prox * 0.82,
-          duration: 0.4,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      }
-    });
-  });
-
-  // ── GSAP comet flash on dot ────────────────────────────────────────────────
-  useEffect(() => {
-    const comet = dotRef.current?.querySelector<HTMLElement>(".comet");
-    if (!comet) return;
-    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.8 });
-    tl.fromTo(comet,
-      { scaleY: 0, opacity: 0.9, transformOrigin: "bottom" },
-      { scaleY: 1, opacity: 0,   duration: 0.55, ease: "power2.out" }
-    );
-    return () => { tl.kill(); };
-  }, []);
-
-  // Mobile: bypass GSAP opacity — show cards fully visible
-  useEffect(() => {
-    if (window.innerWidth >= 768) return;
-    [...leftRefs, ...rightRefs].forEach(r => {
-      if (r.current) r.current.style.opacity = "1";
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ─────────────────────────────────────────────────────────────────────────
   return (
     <section
       ref={sectionRef}
@@ -187,447 +465,190 @@ export default function AchievementsSection() {
       className="relative z-20 overflow-hidden bg-[#0e0c0a]"
       style={{ boxShadow: "0 -12px 48px rgba(0,0,0,0.28)", borderRadius: "28px 28px 0 0" }}
     >
-      {/* bg aksara watermark */}
-      <p
-        className="pointer-events-none absolute -right-10 top-16 select-none font-black leading-none text-[#d6a44b] opacity-[0.028]"
-        style={{ fontSize: "30vw" }}
+      {/* Watermark hanya digeser (translate). Menambah rotate memaksa glyph
+          sebesar ini di-raster ulang tiap frame scroll. */}
+      <motion.p
+        className="pointer-events-none absolute -right-10 top-16 select-none font-black leading-none text-[#d6a44b]"
+        style={{ fontSize: "30vw", opacity: 0.03, y: bgY }}
         aria-hidden
       >
         ꦥ
-      </p>
+      </motion.p>
 
-      <div className="mx-auto max-w-7xl px-5 py-20 md:px-8 lg:py-28">
+      {/* rel emas tipis di tepi kiri — mengisi seiring scroll */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-0 hidden w-[2px] origin-top lg:block"
+        style={{
+          height: "100%",
+          scaleY: railScale,
+          background: "linear-gradient(to bottom, #d6a44b, #a73522 55%, transparent)",
+        }}
+      />
 
-        {/* ── HEADER ──────────────────────────────────────────────────────── */}
-        <div className="mb-14 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      <div className="relative mx-auto max-w-7xl px-5 py-20 md:px-8 lg:py-28">
+        {/* ── HEADER ─────────────────────────────────────────────────────── */}
+        <div className="mb-12 flex flex-col gap-9 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="reveal flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-              <span className="h-px w-6 bg-[#d6a44b]/60" />
-              04 · Karya & Capaian
-            </p>
-            <h2
-              className="reveal mt-5 font-black leading-[0.9]"
-              style={{ fontSize: "clamp(2.8rem, 6.5vw, 5.5rem)" }}
+            <motion.p
+              className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]"
+              initial={{ opacity: 0, x: -16 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.6, ease: EASE }}
             >
-              Dari layar,
+              <span className="h-px w-6 bg-[#d6a44b]/60" />
+              04 · Karya &amp; Capaian
+            </motion.p>
+
+            <h2 className="mt-5 font-black leading-[0.92]" style={{ fontSize: "clamp(2.6rem, 6vw, 5rem)" }}>
+              <Words text="Dari layar," />
               <br />
-              <span className="font-display italic" style={{ color: "#d6a44b" }}>
-                ke panggung.
-              </span>
+              <Words
+                text="ke panggung."
+                className="font-display italic"
+                style={{ color: "#d6a44b" }}
+                delay={0.12}
+              />
             </h2>
+
+            <motion.p
+              className="mt-6 max-w-[46ch] text-sm font-medium leading-[1.9] text-[#a2937d]"
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.7, delay: 0.24, ease: EASE }}
+            >
+              Empat penghargaan kompetisi dan dua program intensif. Klik kartunya untuk
+              melihat dokumentasi lengkap tiap capaian.
+            </motion.p>
           </div>
-          <div className="reveal flex gap-12 lg:flex-col lg:items-end lg:gap-5">
-            {[["4", "Penghargaan"], ["2", "Bootcamp"]].map(([n, l]) => (
-              <div key={l} className="lg:text-right">
-                <p className="text-[2.6rem] font-black leading-none text-[#d6a44b]">{n}</p>
-                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.2em] text-[#6b5f4f] md:text-[#4b3f30]">{l}</p>
+
+          <motion.div
+            className="flex gap-10 lg:flex-col lg:items-end lg:gap-6"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{ duration: 0.7, delay: 0.15, ease: EASE }}
+          >
+            {[
+              { n: counts.kompetisi, l: "Penghargaan" },
+              { n: counts.bootcamp, l: "Bootcamp" },
+              { n: 2, l: "Skala Global" },
+            ].map((s) => (
+              <div key={s.l} className="lg:text-right">
+                <p className="text-[2.6rem] font-black leading-none text-[#d6a44b] tabular-nums">
+                  <Counter to={s.n} />
+                </p>
+                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.2em] text-[#8d8170]">
+                  {s.l}
+                </p>
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
-        {/* ── MARQUEE ─────────────────────────────────────────────────────── */}
-        <div className="mb-16 overflow-hidden border-y border-[#f7efe0]/6 py-4">
-          <div className="marquee-track flex items-center">
-            {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+        {/* ── MARQUEE ────────────────────────────────────────────────────── */}
+        <div className="mb-10 overflow-hidden border-y border-[#f7efe0]/8 py-4">
+          <div className="marquee-track flex w-max items-center">
+            {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((label, i) => (
               <span
                 key={i}
-                className="mx-14 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#8d8170] md:text-[#3b3028]"
+                className="mx-10 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#8d8170]"
               >
-                <span className="mr-4 text-[#d6a44b]/40">ꦱ</span>
-                {item}
+                <span className="mr-4 text-[#d6a44b]/70">ꦱ</span>
+                {label}
               </span>
             ))}
           </div>
         </div>
 
-        {/* ── TIMELINE GRID ───────────────────────────────────────────────── */}
-        <div ref={timelineRef} className="relative">
-
-          {/* center line + dot — desktop only ─────────────────────────────── */}
-          <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden>
-
-            {/* bg track */}
-            <div
-              className="absolute left-1/2 w-px -translate-x-1/2 bg-[#1e1a16]"
-              style={{ top: LINE_PAD, bottom: LINE_PAD }}
-            />
-
-            {/* gold filled portion */}
-            <motion.div
-              className="absolute left-1/2 w-px -translate-x-1/2 origin-top"
-              style={{
-                top: LINE_PAD,
-                height: filledH,
-                background: "linear-gradient(to bottom, #d6a44b, #d6a44b55)",
-              }}
-            />
-
-            {/* glowing dot */}
-            <motion.div
-              ref={dotRef}
-              className="absolute left-1/2 -translate-x-1/2"
-              style={{ top: dotYMV, marginTop: -5 }}
-            >
-              {/* GSAP comet tail */}
-              <div
-                className="comet absolute left-1/2 w-px -translate-x-1/2"
-                style={{
-                  bottom: "50%",
-                  height: 52,
-                  background: "linear-gradient(to top, #d6a44b, transparent)",
-                  transformOrigin: "bottom",
-                }}
-              />
-
-              {/* outer glow pulse */}
-              <motion.div
-                className="absolute rounded-full bg-[#d6a44b]"
-                style={{ width: 22, height: 22, left: -11, top: -11 }}
-                animate={{ scale: [1, 2.6, 3.4], opacity: [0.5, 0.12, 0] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
-              />
-              {/* mid ring */}
-              <motion.div
-                className="absolute rounded-full bg-[#d6a44b]"
-                style={{ width: 14, height: 14, left: -7, top: -7 }}
-                animate={{ scale: [1, 1.9, 2.5], opacity: [0.4, 0.1, 0] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut", delay: 0.38 }}
-              />
-
-              {/* core dot */}
-              <div
-                className="relative rounded-full bg-[#d6a44b]"
-                style={{
-                  width: 8,
-                  height: 8,
-                  marginLeft: -4,
-                  marginTop: -4,
-                  boxShadow: "0 0 16px 6px #d6a44b80, 0 0 5px 1px #d6a44b",
-                }}
-              />
-              {/* inner bright */}
-              <div
-                className="absolute rounded-full bg-[#fff7ea]"
-                style={{ width: 3, height: 3, left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}
-              />
-            </motion.div>
-          </div>
-
-          {/* ── ROW 0 — Top 50 Global + Juara 1 ────────────────────────── */}
+        {/* ── FILTER ─────────────────────────────────────────────────────── */}
+        <motion.div
+          className="mb-8 flex flex-wrap items-center justify-between gap-4"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-8%" }}
+          transition={{ duration: 0.55, ease: EASE }}
+        >
           <div
-            ref={row0}
-            className="mb-4 grid items-center gap-3 lg:grid-cols-[1fr_56px_1fr]"
+            role="tablist"
+            aria-label="Filter capaian"
+            className="inline-flex items-center gap-1 border border-[#f7efe0]/12 bg-[#15110d] p-1"
           >
-            {/* LEFT: Top 50 Global */}
-            <div ref={left0} style={{ opacity: 0.32 }}>
-              <div
-                className="group relative overflow-hidden border border-[#f7efe0]/8"
-                style={{ minHeight: "400px", background: "#0d0b09" }}
-              >
-                <div className="absolute inset-0">
-                  <Image
-                    src="/achievement/baseproject.png"
-                    alt="Base Build Hackathon Global"
-                    fill
-                    sizes="(min-width: 1024px) 45vw, 90vw"
-                    className="object-cover opacity-[0.28] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09] via-[#0d0b09]/60 to-transparent" />
-                </div>
-                <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#d6a44b] via-[#d6a44b]/40 to-transparent" />
-                <div
-                  className="relative flex h-full flex-col justify-between p-8 md:p-10 transition-all duration-500 group-hover:blur-sm"
-                  style={{ minHeight: "400px" }}
+            {achievementFilters.map((f) => {
+              const isActive = filter === f.id;
+              return (
+                <button
+                  key={f.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  type="button"
+                  onClick={() => setFilter(f.id)}
+                  className="relative px-4 py-2 outline-none focus-visible:ring-1 focus-visible:ring-[#d6a44b]"
                 >
-                  <div className="flex items-start justify-between">
-                    <span className="border border-[#d6a44b]/35 bg-[#1e1508]/80 px-3.5 py-1.5 text-[8px] font-black uppercase tracking-[0.22em] text-[#d6a44b] backdrop-blur-sm">
-                      2025 · Base Build Hackathon
-                    </span>
-                    <span className="text-[8px] font-black uppercase tracking-[0.18em] text-[#6b5f4f] md:text-[#4b3f30]">
-                      Base · Coinbase
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-black leading-none text-[#d6a44b]" style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>Top</p>
-                    <p className="font-black leading-[0.82] text-[#fff7ea]" style={{ fontSize: "clamp(5rem, 13vw, 10rem)" }}>50</p>
-                    <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
-                      <div>
-                        <p className="text-base font-black text-[#c9b99d]">Winner · Global Competition</p>
-                        <p className="mt-1 max-w-[36ch] text-xs font-medium leading-6 text-[#8d8170] md:text-[#5a4f40]">
-                          Salah satu dari 50 tim terbaik di hackathon global Base yang diselenggarakan oleh Coinbase.
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        {["Web3", "Blockchain", "Global"].map(t => (
-                          <span key={t} className="border border-[#d6a44b]/20 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.16em] text-[#d6a44b]/55">{t}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* CENTER: milestone dot 0 */}
-            <div className="hidden items-center justify-center lg:flex">
-              <div ref={ms0} style={{ opacity: 0.18 }}>
-                <div
-                  className="h-3 w-3 rounded-full bg-[#d6a44b]"
-                  style={{ boxShadow: "0 0 10px 4px #d6a44b55" }}
-                />
-              </div>
-            </div>
-
-            {/* RIGHT: Juara 1 */}
-            <div ref={right0} style={{ opacity: 0.32 }}>
-              <div
-                className="group relative overflow-hidden border border-[#f7efe0]/8"
-                style={{ minHeight: "400px", background: "#100e0c" }}
-              >
-                <div className="absolute inset-0">
-                  <Image
-                    src="/achievement/web2.png"
-                    alt="Web Design Competition UTI"
-                    fill
-                    sizes="(min-width: 1024px) 45vw, 90vw"
-                    className="object-cover opacity-[0.28] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.05] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#100e0c] via-[#100e0c]/55 to-transparent" />
-                </div>
-                <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#d6a44b]/70 to-transparent" />
-                <div
-                  className="relative flex h-full flex-col justify-between p-8 md:p-10 transition-all duration-500 group-hover:blur-sm"
-                  style={{ minHeight: "400px" }}
-                >
-                  <div className="flex items-start justify-between">
-                    <span className="border border-[#d6a44b]/25 bg-[#100e0c]/70 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.2em] text-[#d6a44b]/70 backdrop-blur-sm">
-                      Juara 1 · Pertama
-                    </span>
-                    <span className="text-[7px] font-black uppercase tracking-[0.18em] text-[#8d8170] md:text-[#3b3028]">2025</span>
-                  </div>
-                  <div>
-                    <p className="font-black leading-none text-[#d6a44b]" style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>Juara</p>
-                    <p className="font-black leading-[0.82] text-[#fff7ea]" style={{ fontSize: "clamp(5rem, 13vw, 10rem)" }}>1</p>
-                    <p className="mt-2 text-xl font-black leading-[1.12] text-[#c9b99d]">Web Design Competition</p>
-                    <p className="mt-1.5 text-[10px] font-medium text-[#8d8170] md:text-[#5a4f40]">Universitas Teknokrat Indonesia</p>
-                    <span className="mt-3 inline-block border border-[#f7efe0]/10 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#3b3028]">Design</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── ROW 1 — Juara 3 + Most Favorite ────────────────────────── */}
-          <div
-            ref={row1}
-            className="mb-4 grid items-center gap-3 lg:grid-cols-[1fr_56px_1fr]"
-          >
-            {/* LEFT: Juara 3 */}
-            <div ref={left1} style={{ opacity: 0.32 }}>
-              <div
-                className="group relative overflow-hidden border border-[#f7efe0]/8"
-                style={{ minHeight: "340px", background: "#0d0b09" }}
-              >
-                <div className="absolute inset-0">
-                  <Image
-                    src="/achievement/baseindo.png"
-                    alt="Hackathon Base Indonesia"
-                    fill
-                    sizes="(min-width: 1024px) 45vw, 90vw"
-                    className="object-cover opacity-[0.22] saturate-[0.35] transition-all duration-700 group-hover:scale-[1.05] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09] via-[#0d0b09]/55 to-transparent" />
-                </div>
-                <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#a73522]/80 to-transparent" />
-                <div
-                  className="relative flex h-full flex-col justify-between p-7 md:p-9 transition-all duration-500 group-hover:blur-sm"
-                  style={{ minHeight: "340px" }}
-                >
-                  <div className="flex items-start justify-between">
-                    <span className="border border-[#a73522]/30 bg-[#0d0b09]/70 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.2em] text-[#a73522]/75 backdrop-blur-sm">
-                      Juara 3 · Ketiga
-                    </span>
-                    <span className="text-[7px] font-black uppercase tracking-[0.18em] text-[#8d8170] md:text-[#3b3028]">2025</span>
-                  </div>
-                  <div>
-                    <p className="font-black leading-none text-[#a73522]" style={{ fontSize: "clamp(2rem, 4.5vw, 4rem)" }}>Juara</p>
-                    <p className="font-black leading-[0.82] text-[#fff7ea]" style={{ fontSize: "clamp(4.5rem, 11vw, 9rem)" }}>3</p>
-                    <p className="mt-2 text-lg font-black leading-[1.12] text-[#c9b99d]">Hackathon Base Indonesia</p>
-                    <p className="mt-1.5 text-[10px] font-medium text-[#8d8170] md:text-[#5a4f40]">Base Indonesia Community</p>
-                    <div className="mt-3 flex gap-1.5">
-                      {["Blockchain", "Web3"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* CENTER: milestone dot 1 */}
-            <div className="hidden items-center justify-center lg:flex">
-              <div ref={ms1} style={{ opacity: 0.18 }}>
-                <div
-                  className="h-3 w-3 rounded-full bg-[#a73522]"
-                  style={{ boxShadow: "0 0 10px 4px #a7352255" }}
-                />
-              </div>
-            </div>
-
-            {/* RIGHT: Most Favorite */}
-            <div ref={right1} style={{ opacity: 0.32 }}>
-              <div
-                className="group relative overflow-hidden border border-[#f7efe0]/8"
-                style={{ minHeight: "340px", background: "#0c0a08" }}
-              >
-                <div className="absolute inset-0">
-                  <Image
-                    src="/achievement/lisk.png"
-                    alt="Lisk Builder Program 2"
-                    fill
-                    sizes="(min-width: 1024px) 45vw, 90vw"
-                    className="object-cover object-top opacity-[0.28] saturate-[0.35] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.80] group-hover:saturate-[0.85]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a08] via-[#0c0a08]/55 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0c0a08]/60 via-transparent to-[#0c0a08]/30" />
-                </div>
-                <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#a73522] via-[#a73522]/40 to-transparent" />
-                <div
-                  className="relative flex h-full flex-col justify-between p-7 md:p-9 transition-all duration-500 group-hover:blur-sm"
-                  style={{ minHeight: "340px" }}
-                >
-                  <span className="inline-block border border-[#a73522]/30 bg-[#150606]/70 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.22em] text-[#a73522]/80">
-                    Most Favorite Project
+                  {isActive && (
+                    <motion.span
+                      layoutId="ach-filter-pill"
+                      className="absolute inset-0 bg-[#d6a44b]"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span
+                    className={`relative flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-200 ${
+                      isActive ? "text-[#100d0a]" : "text-[#8d8170] hover:text-[#f7efe0]"
+                    }`}
+                  >
+                    {f.label}
+                    <span className={isActive ? "opacity-60" : "opacity-40"}>{counts[f.id]}</span>
                   </span>
-                  <div>
-                    <p className="font-black leading-[1.05] text-[#fff7ea]" style={{ fontSize: "clamp(1.6rem, 3.8vw, 3rem)" }}>
-                      Lisk Builder<br />Program 2
-                    </p>
-                    <p className="mt-2 text-sm font-medium text-[#8d8170] md:text-[#5a4f40]">
-                      Dipilih sebagai proyek paling disukai komunitas · Lisk · 2025
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {["Community Choice", "Lisk L2", "Blockchain"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-3.5 py-1.5 text-[7px] font-black uppercase tracking-[0.16em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                </button>
+              );
+            })}
           </div>
 
-          {/* ── Bootcamp sub-header ──────────────────────────────────────── */}
-          <div className="my-12 lg:grid lg:grid-cols-[1fr_56px_1fr] lg:items-end">
-            <div className="border-b border-[#f7efe0]/8 pb-6">
-              <p className="reveal flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#d6a44b]">
-                <span className="h-px w-6 bg-[#d6a44b]/60" />
-                Bootcamp · Pendidikan
-              </p>
-              <h3 className="reveal mt-4 font-black leading-[1.1]" style={{ fontSize: "clamp(1.4rem, 3vw, 2.4rem)" }}>
-                Dua program intensif
-                <br />
-                <span style={{ color: "rgba(247,239,224,0.35)" }}>di Yogyakarta.</span>
-              </h3>
-            </div>
-            {/* center spacer (keeps line visible through sub-header) */}
-            <div className="hidden lg:block" />
-            <div className="hidden items-end justify-end border-b border-[#f7efe0]/8 pb-6 lg:flex">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8d8170] md:text-[#3b3028]">2025 · Jogja</p>
-            </div>
-          </div>
+          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#6b5f4f]">
+            {visible.length} kartu ditampilkan
+          </p>
+        </motion.div>
 
-          {/* ── ROW 2 — Bootcamp ────────────────────────────────────────── */}
-          <div
-            ref={row2}
-            className="grid items-start gap-3 lg:grid-cols-[1fr_56px_1fr]"
-          >
-            {/* LEFT: Base Indonesia Workshop */}
-            <div ref={left2} style={{ opacity: 0.32 }}>
-              <div className="group overflow-hidden border border-[#f7efe0]/8" style={{ background: "#100e0c" }}>
-                <div className="relative overflow-hidden" style={{ height: "240px" }}>
-                  <Image
-                    src="/achievement/basework.png"
-                    alt="Base Indonesia Workshop Batch 2"
-                    fill
-                    sizes="(min-width: 1024px) 45vw, 90vw"
-                    className="object-cover opacity-[0.38] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.82] group-hover:saturate-[0.85]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#100e0c] via-[#100e0c]/30 to-transparent" />
-                  <div className="absolute left-5 top-5 flex gap-2">
-                    <span className="border border-[#d6a44b]/35 bg-[#100e0c]/75 px-3 py-1.5 text-[7px] font-black uppercase tracking-[0.2em] text-[#d6a44b]/80 backdrop-blur-sm">Batch 2</span>
-                    <span className="border border-[#f7efe0]/12 bg-[#100e0c]/75 px-3 py-1.5 text-[7px] font-black uppercase tracking-[0.2em] text-[#6b5f4f] backdrop-blur-sm">Workshop</span>
-                  </div>
-                  <p className="pointer-events-none absolute bottom-4 right-5 select-none font-black text-[#d6a44b] opacity-[0.15]" style={{ fontSize: "5rem" }} aria-hidden>ꦧ</p>
-                </div>
-                <div className="p-6 lg:p-7 transition-all duration-500 group-hover:blur-sm">
-                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b]/60">September – Oktober 2025</p>
-                  <h3 className="mt-2 text-2xl font-black text-[#fff7ea]">Base Indonesia</h3>
-                  <p className="mt-1.5 text-sm font-medium leading-6 text-[#8d8170] md:text-[#5a4f40]">
-                    Workshop intensif Web3 di Jogja bersama komunitas Base Indonesia, mengeksplorasi pengembangan smart contract dan ekosistem Layer 2.
-                  </p>
-                  <div className="mt-5 flex items-center justify-between gap-4">
-                    <div className="flex flex-wrap gap-1.5">
-                      {["Web3", "Smart Contract", "Base L2"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
-                      ))}
-                    </div>
-                    <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.18em] text-[#2e2620]">ꦗꦒꦗ</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* ── BENTO GRID ─────────────────────────────────────────────────── */}
+        <motion.div layout className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
+          <AnimatePresence mode="popLayout">
+            {visible.map((item, i) => (
+              <AchievementCard key={item.id} item={item} index={i} onOpen={openCard} />
+            ))}
+          </AnimatePresence>
+        </motion.div>
 
-            {/* CENTER: milestone dot 2 */}
-            <div className="hidden items-start justify-center pt-28 lg:flex">
-              <div ref={ms2} style={{ opacity: 0.18 }}>
-                <div
-                  className="h-3 w-3 rounded-full bg-[#d6a44b]"
-                  style={{ boxShadow: "0 0 10px 4px #d6a44b55" }}
-                />
-              </div>
-            </div>
-
-            {/* RIGHT: Dev Web3 Jogja */}
-            <div ref={right2} style={{ opacity: 0.32 }}>
-              <div className="group overflow-hidden border border-[#f7efe0]/8" style={{ background: "#0d0b09" }}>
-                <div className="relative overflow-hidden" style={{ height: "240px" }}>
-                  <Image
-                    src="/achievement/devweb3.png"
-                    alt="Dev Web3 Jogja Batch 5"
-                    fill
-                    sizes="(min-width: 1024px) 45vw, 90vw"
-                    className="object-cover opacity-[0.38] saturate-[0.4] transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-[0.82] group-hover:saturate-[0.85]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09] via-[#0d0b09]/30 to-transparent" />
-                  <div className="absolute left-5 top-5 flex gap-2">
-                    <span className="border border-[#d6a44b]/35 bg-[#0d0b09]/75 px-3 py-1.5 text-[7px] font-black uppercase tracking-[0.2em] text-[#d6a44b]/80 backdrop-blur-sm">Batch 5</span>
-                    <span className="border border-[#f7efe0]/12 bg-[#0d0b09]/75 px-3 py-1.5 text-[7px] font-black uppercase tracking-[0.2em] text-[#6b5f4f] backdrop-blur-sm">Bootcamp</span>
-                  </div>
-                  <p className="pointer-events-none absolute bottom-4 right-5 select-none font-black text-[#d6a44b] opacity-[0.15]" style={{ fontSize: "5rem" }} aria-hidden>ꦮ</p>
-                </div>
-                <div className="p-6 lg:p-7 transition-all duration-500 group-hover:blur-sm">
-                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b]/60">November – Desember 2025</p>
-                  <h3 className="mt-2 text-2xl font-black text-[#fff7ea]">Dev Web3 Jogja</h3>
-                  <p className="mt-1.5 text-sm font-medium leading-6 text-[#8d8170] md:text-[#5a4f40]">
-                    Bootcamp full-stack Web3 di Yogyakarta, membangun aplikasi terdesentralisasi dari dasar hingga deployment ke mainnet.
-                  </p>
-                  <div className="mt-5 flex items-center justify-between gap-4">
-                    <div className="flex flex-wrap gap-1.5">
-                      {["DeFi", "Solidity", "dApp"].map(t => (
-                        <span key={t} className="border border-[#f7efe0]/10 bg-[#f7efe0]/4 px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#8d8170] md:text-[#3b3028]">{t}</span>
-                      ))}
-                    </div>
-                    <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.18em] text-[#2e2620]">ꦗꦒꦗ</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>{/* /timeline grid */}
+        {/* ── FOOTNOTE ───────────────────────────────────────────────────── */}
+        <motion.div
+          className="mt-10 flex flex-wrap items-center gap-4 border-t border-[#f7efe0]/8 pt-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: EASE }}
+        >
+          <span className="grid h-8 w-8 place-items-center border border-[#d6a44b]/25 bg-[#d6a44b]/[0.08] text-sm font-black text-[#d6a44b]">
+            ꦱ
+          </span>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8d8170]">
+            {yearSpan} · Yogyakarta &amp; Surakarta
+          </p>
+        </motion.div>
       </div>
+
+      {/* lightbox lewat portal — section ini kena transform dari SkillsSection,
+          jadi position:fixed harus hidup di luar pohon DOM-nya */}
+      {portalReady &&
+        createPortal(
+          <AnimatePresence>
+            {activeItem && (
+              <Lightbox key={activeItem.id} item={activeItem} onClose={closeCard} />
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </section>
   );
 }
