@@ -1,321 +1,354 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  AnimatePresence,
   motion,
+  useInView,
+  useReducedMotion,
   useScroll,
   useSpring,
-  useMotionValue,
   useTransform,
-  useMotionValueEvent,
 } from "framer-motion";
-import gsap from "gsap";
+import { experienceRoles, experiences, type Experience } from "../data/experiences";
+import OrgLogo from "./OrgLogo";
+import { Counter, EASE, Words } from "./RevealBits";
 
-// ── constants ──────────────────────────────────────────────────────────────────
-const LINE_PAD      = 72;
-const PROX_FEAT     = 420;
-const PROX_ROW      = 300;
-const MAX_ROW_SHIFT = 24;
+const YEARS = Array.from(new Set(experiences.map((e) => e.year)));
+const SPOTLIGHT_IDS = experiences.filter((e) => e.spotlight).map((e) => e.id);
+const ORG_COUNT = experiences.filter(
+  (e) => e.kind === "Organisasi" || e.kind === "Kepanitiaan"
+).length;
 
-const MARQUEE_ROLES = [
-  "Frontend Developer",
-  "Asisten Dosen",
-  "Ketua Pelaksana PKKMB",
-  "Staff Minat & Bakat",
-  "Koordinator Bidang",
-  "Staff General Affair",
-  "Staff PKKMB",
-];
+// ── satu baris pengalaman ────────────────────────────────────────────────────
+// Di-memo supaya perubahan `activeIndex` (terjadi tiap kali satu baris melewati
+// tengah layar saat scroll) tidak me-render ulang ketujuh baris sekaligus.
+const ExperienceRow = memo(function ExperienceRow({
+  exp,
+  index,
+  isOpen,
+  onToggle,
+  onActive,
+  registerRef,
+}: {
+  exp: Experience;
+  index: number;
+  isOpen: boolean;
+  onToggle: (id: string) => void;
+  onActive: (index: number) => void;
+  registerRef: (index: number, el: HTMLDivElement | null) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-45% 0px -45% 0px" });
+  const reduce = useReducedMotion();
+  const panelId = `exp-panel-${exp.id}`;
 
-// ── types ──────────────────────────────────────────────────────────────────────
-type Experience = {
-  id: string;
-  roleLines: string[];
-  company: string;
-  period: string;
-  year: string;
-  desc: string;
-  wins: string[];
-  tags: string[];
-  aksara: string;
-  accent: string;
-};
+  useEffect(() => {
+    if (inView) onActive(index);
+  }, [inView, index, onActive]);
 
-const EXPERIENCES: Experience[] = [
-  {
-    id: "01",
-    roleLines: ["Frontend", "Developer"],
-    company: "Program Hibah Magang Berdampak · PT Esize Surakarta",
-    period: "2025",
-    year: "2025",
-    desc: "Berkontribusi sebagai frontend developer dalam program hibah magang berdampak untuk membangun web perusahaan konveksi PT Esize Surakarta.",
-    wins: [
-      "Mengembangkan antarmuka web perusahaan konveksi",
-      "Menerjemahkan kebutuhan bisnis PT Esize ke pengalaman web yang rapi",
-      "Berkoordinasi dalam tim untuk memastikan fitur dan tampilan sesuai kebutuhan",
-    ],
-    tags: ["Frontend", "Web Development", "React", "Teamwork"],
-    aksara: "ꦩ",
-    accent: "#a73522",
-  },
-  {
-    id: "02",
-    roleLines: ["Coordinating", "Ministry", "Interests & Talents"],
-    company: "BEM FATISDA UNS · Contract · Hybrid",
-    period: "Feb 2025 — Dec 2025",
-    year: "2025",
-    desc: "Mengelola agenda pengembangan minat dan bakat mahasiswa di lingkungan FATISDA UNS, dari koordinasi program, komunikasi lintas divisi, hingga pelaksanaan kegiatan.",
-    wins: [
-      "Koordinasi program selama 11 bulan di Surakarta",
-      "Menjaga alur komunikasi antara panitia, peserta, dan stakeholder",
-      "Mengasah problem solving dalam kegiatan organisasi kampus",
-    ],
-    tags: ["Communication", "Problem Solving", "Leadership", "Teamwork"],
-    aksara: "ꦥ",
-    accent: "#d6a44b",
-  },
-  {
-    id: "03",
-    roleLines: ["Chairman", "PKKMB", "FATISDA"],
-    company: "PKKMB FATISDA UNS · Surakarta",
-    period: "Apr 2025 — Aug 2025",
-    year: "2025",
-    desc: "Memimpin pelaksanaan PKKMB FATISDA UNS sebagai ketua pelaksana, memastikan perencanaan, koordinasi tim, dan eksekusi acara berjalan rapi.",
-    wins: [
-      "Memimpin rangkaian kegiatan selama 5 bulan",
-      "Mengkoordinasikan tim lintas divisi dari persiapan hingga evaluasi",
-      "Menjaga kualitas acara, komunikasi, dan ritme kerja panitia",
-    ],
-    tags: ["Leadership", "Communication", "Event Management", "Teamwork"],
-    aksara: "ꦧ",
-    accent: "#a73522",
-  },
-  {
-    id: "04",
-    roleLines: ["Assistant", "Data Structure", "Algorithm"],
-    company: "FATISDA UNS · Part-time · On-site",
-    period: "Mar 2025 — Jul 2025",
-    year: "2025",
-    desc: "Mendukung pembelajaran mata kuliah Data Structure and Algorithm sebagai assistant, membantu mahasiswa memahami materi teknis dan latihan pemrograman.",
-    wins: [
-      "Mendampingi kelas secara on-site selama 5 bulan",
-      "Membantu diskusi Java, struktur data, dan penyelesaian soal",
-      "Menguatkan kemampuan public speaking dalam konteks akademik",
-    ],
-    tags: ["Java", "Data Structure", "Algorithm", "Public Speaking"],
-    aksara: "ꦒ",
-    accent: "#d6a44b",
-  },
-  {
-    id: "05",
-    roleLines: ["Staff", "Interests &", "Talents"],
-    company: "HIMASTER UNS · Surakarta · On-site",
-    period: "Feb 2024 — Dec 2024",
-    year: "2024",
-    desc: "Berkontribusi di Divisi Minat dan Bakat HIMASTER UNS dalam perencanaan serta pelaksanaan program untuk mahasiswa informatika.",
-    wins: [],
-    tags: ["Communication", "Teamwork", "Organization"],
-    aksara: "ꦲ",
-    accent: "#d6a44b",
-  },
-  {
-    id: "06",
-    roleLines: ["Staff", "PKKMB Wonder", "Quest 2024"],
-    company: "HIMASTER UNS · Surakarta · On-site",
-    period: "Sep 2024 — Oct 2024",
-    year: "2024",
-    desc: "Menjadi bagian dari tim pelaksana PKKMB Wonder Quest 2024, membantu kebutuhan acara dan koordinasi lapangan selama rangkaian kegiatan.",
-    wins: [],
-    tags: ["Communication", "Teamwork", "Event"],
-    aksara: "ꦮ",
-    accent: "#a73522",
-  },
-  {
-    id: "07",
-    roleLines: ["Staff", "General Affair", "Division"],
-    company: "PINGFEST · Pekan Informasi dan Teknologi",
-    period: "Mar 2024 — Sep 2024",
-    year: "2024",
-    desc: "Bergabung di Divisi General Affair PINGFEST untuk mendukung kebutuhan operasional, logistik, dan koordinasi internal acara teknologi.",
-    wins: [],
-    tags: ["General Affair", "Communication", "Teamwork", "Operations"],
-    aksara: "ꦠ",
-    accent: "#d6a44b",
-  },
-];
-
-const FEATURED_IDS   = new Set(["01", "04"]);
-const FEATURED       = EXPERIENCES.filter(e =>  FEATURED_IDS.has(e.id));
-const SUPPORTING     = EXPERIENCES.filter(e => !FEATURED_IDS.has(e.id));
-
-function Tags({ exp }: { exp: Experience }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {exp.tags.map(tag => (
+    <div
+      ref={(el) => {
+        ref.current = el;
+        registerRef(index, el);
+      }}
+      className="grid grid-cols-[1.75rem_1fr] gap-x-3 lg:grid-cols-[2.5rem_1fr] lg:gap-x-5"
+    >
+      {/* ── simpul di rel ── */}
+      <div className="relative flex justify-center pt-[2.35rem]">
+        <motion.span
+          className="relative block h-3 w-3 rounded-full border-2"
+          animate={{
+            scale: isOpen ? 1.25 : inView ? 1.1 : 0.85,
+            borderColor: inView || isOpen ? exp.accent : "#2a231c",
+            backgroundColor: isOpen ? exp.accent : "#0f0c09",
+          }}
+          transition={{ duration: 0.4, ease: EASE }}
+          style={{ boxShadow: inView ? `0 0 12px 3px ${exp.accent}44` : "none" }}
+        />
+      </div>
+
+      {/* ── kartu ── */}
+      <motion.article
+        className="relative mb-3 overflow-hidden border"
+        animate={{
+          borderColor: isOpen ? `${exp.accent}47` : "rgba(247,239,224,0.08)",
+          backgroundColor: isOpen ? `${exp.accent}0a` : "rgba(247,239,224,0)",
+        }}
+        transition={{ duration: 0.35, ease: EASE }}
+      >
+        {/* nomor hantu di latar */}
         <span
-          key={tag}
-          className="border bg-[#f7efe0]/[0.03] px-2.5 py-1 text-[6.5px] font-black uppercase tracking-[0.14em]"
-          style={{ borderColor: exp.accent + "22", color: exp.accent + "72" }}
+          aria-hidden
+          className="pointer-events-none absolute -right-2 -top-6 select-none font-black leading-none transition-transform duration-700 ease-out"
+          style={{
+            color: exp.accent,
+            opacity: isOpen ? 0.09 : 0.045,
+            fontSize: "8rem",
+            transform: isOpen ? "translateY(6px)" : "none",
+          }}
         >
-          {tag}
+          {exp.id}
         </span>
-      ))}
+
+        {/* bilah aksen kiri */}
+        <motion.span
+          aria-hidden
+          className="absolute left-0 top-0 w-[2px] origin-top"
+          animate={{ scaleY: isOpen ? 1 : 0 }}
+          transition={{ duration: 0.4, ease: EASE }}
+          style={{
+            height: "100%",
+            background: `linear-gradient(to bottom, ${exp.accent}, transparent)`,
+          }}
+        />
+
+        {/* garis sapuan saat kartu dibuka */}
+        <AnimatePresence>
+          {isOpen && !reduce && (
+            <motion.span
+              key="sweep"
+              aria-hidden
+              className="pointer-events-none absolute left-0 top-0 h-px w-full origin-left"
+              initial={{ scaleX: 0, opacity: 0.9 }}
+              animate={{ scaleX: 1, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeInOut" }}
+              style={{
+                background: `linear-gradient(to right, transparent, ${exp.accent}, transparent)`,
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        <button
+          type="button"
+          onClick={() => onToggle(exp.id)}
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          className="group relative flex w-full items-start gap-4 p-4 text-left outline-none transition-colors duration-300 hover:bg-[#f7efe0]/[0.025] focus-visible:ring-1 focus-visible:ring-[#d6a44b] md:gap-5 md:p-5"
+        >
+          {/* slot logo instansi */}
+          <motion.span
+            className="relative block"
+            whileHover={reduce ? undefined : { y: -3, rotate: -2 }}
+            transition={{ duration: 0.25, ease: EASE }}
+          >
+            <OrgLogo
+              src={exp.logo}
+              alt={`Logo ${exp.company}`}
+              fallback={exp.aksara}
+              accent={exp.accent}
+              size={56}
+              className="md:!h-16 md:!w-16"
+            />
+          </motion.span>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="text-[8px] font-black uppercase tracking-[0.26em]"
+                style={{ color: `${exp.accent}b0` }}
+              >
+                {exp.id}
+              </span>
+              <span
+                className="border px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.18em]"
+                style={{
+                  borderColor: `${exp.accent}33`,
+                  background: `${exp.accent}12`,
+                  color: `${exp.accent}dd`,
+                }}
+              >
+                {exp.kind}
+              </span>
+              {exp.spotlight && (
+                <span className="border border-[#f7efe0]/15 bg-[#f7efe0]/[0.04] px-2 py-0.5 text-[7.5px] font-black uppercase tracking-[0.18em] text-[#c9b99d]">
+                  Spotlight
+                </span>
+              )}
+            </div>
+
+            <h3
+              className="mt-2 font-black leading-[1.12] text-[#fff7ea]"
+              style={{ fontSize: "clamp(1.05rem, 1.9vw, 1.45rem)" }}
+            >
+              {exp.role}
+            </h3>
+
+            <p className="mt-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-[#c9b99d]">
+              {exp.company}
+            </p>
+            <p className="mt-1 text-[10px] font-medium text-[#8d8170]">
+              {exp.unit ? `${exp.unit} · ` : ""}
+              {exp.location} · {exp.mode}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <span
+              className="whitespace-nowrap border px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em]"
+              style={{ borderColor: `${exp.accent}2e`, color: `${exp.accent}cc` }}
+            >
+              {exp.periodShort}
+            </span>
+            <span className="hidden text-[8px] font-black uppercase tracking-[0.18em] text-[#8d8170] sm:block">
+              {exp.duration}
+            </span>
+            <motion.span
+              aria-hidden
+              className="mt-1 grid h-7 w-7 place-items-center border text-[13px] font-black leading-none"
+              animate={{ rotate: isOpen ? 45 : 0 }}
+              transition={{ duration: 0.35, ease: EASE }}
+              style={{
+                borderColor: `${exp.accent}33`,
+                color: exp.accent,
+              }}
+            >
+              +
+            </motion.span>
+          </div>
+        </button>
+
+        {/* ── detail ── */}
+        <AnimatePresence initial={false}>
+          {isOpen && (
+            <motion.div
+              key="detail"
+              id={panelId}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{
+                height: { duration: 0.45, ease: EASE },
+                opacity: { duration: 0.3, ease: "linear" },
+              }}
+              className="relative overflow-hidden"
+            >
+              <div
+                className="border-t px-4 pb-6 pt-5 md:px-5 md:pl-[5.75rem]"
+                style={{ borderColor: `${exp.accent}1f` }}
+              >
+                <motion.p
+                  className="max-w-[72ch] text-[13px] font-medium leading-[1.9] text-[#a2937d]"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.08, ease: EASE }}
+                >
+                  {exp.desc}
+                </motion.p>
+
+                {exp.wins.length > 0 && (
+                  <ul className="mt-5 grid gap-2.5">
+                    {exp.wins.map((win, i) => (
+                      <motion.li
+                        key={win}
+                        className="flex gap-3 text-[12.5px] font-semibold leading-[1.7] text-[#c9b99d]"
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 0.14 + i * 0.07, ease: EASE }}
+                      >
+                        <span
+                          className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rotate-45"
+                          style={{ background: exp.accent }}
+                        />
+                        <span>{win}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                )}
+
+                <motion.div
+                  className="mt-6 flex flex-wrap items-center gap-1.5"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.24, ease: EASE }}
+                >
+                  <span className="mr-1 text-[8px] font-black uppercase tracking-[0.22em] text-[#6b5f4f]">
+                    Fokus
+                  </span>
+                  {exp.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="border bg-[#f7efe0]/[0.04] px-2.5 py-1 text-[7.5px] font-black uppercase tracking-[0.16em]"
+                      style={{ borderColor: `${exp.accent}26`, color: `${exp.accent}c0` }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  <span className="ml-auto text-[8px] font-black uppercase tracking-[0.2em] text-[#6b5f4f]">
+                    {exp.period}
+                  </span>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.article>
     </div>
   );
-}
+});
 
+// ── section ──────────────────────────────────────────────────────────────────
 export default function ExperienceSection() {
-  const sectionRef   = useRef<HTMLElement>(null);
-  const timelineRef  = useRef<HTMLDivElement>(null);
-  const dotRef       = useRef<HTMLDivElement>(null);
-  const timelineHRef = useRef(2400);
+  const sectionRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const rowEls = useRef<(HTMLDivElement | null)[]>([]);
 
-  // ── featured refs ──────────────────────────────────────────────────────────
-  const feat0  = useRef<HTMLDivElement>(null);
-  const feat1  = useRef<HTMLDivElement>(null);
-  const fms0   = useRef<HTMLDivElement>(null);
-  const fms1   = useRef<HTMLDivElement>(null);
-  const scan0  = useRef<HTMLDivElement>(null);
-  const scan1  = useRef<HTMLDivElement>(null);
-  const featRefs = useRef([feat0, feat1]).current;
-  const fmsRefs  = useRef([fms0, fms1]).current;
-  const scanRefs = useRef([scan0, scan1]).current;
+  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(SPOTLIGHT_IDS));
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // ── supporting refs ────────────────────────────────────────────────────────
-  const srow0 = useRef<HTMLDivElement>(null);
-  const srow1 = useRef<HTMLDivElement>(null);
-  const srow2 = useRef<HTMLDivElement>(null);
-  const srow3 = useRef<HTMLDivElement>(null);
-  const srow4 = useRef<HTMLDivElement>(null);
-  const sms0  = useRef<HTMLDivElement>(null);
-  const sms1  = useRef<HTMLDivElement>(null);
-  const sms2  = useRef<HTMLDivElement>(null);
-  const sms3  = useRef<HTMLDivElement>(null);
-  const sms4  = useRef<HTMLDivElement>(null);
-  const srowRefs = useRef([srow0, srow1, srow2, srow3, srow4]).current;
-  const smsRefs  = useRef([sms0, sms1, sms2, sms3, sms4]).current;
+  const registerRef = useCallback((index: number, el: HTMLDivElement | null) => {
+    rowEls.current[index] = el;
+  }, []);
 
-  const featTrigYs = useRef<number[]>([99999, 99999]);
-  const srowTrigYs = useRef<number[]>([99999, 99999, 99999, 99999, 99999]);
-  const scanFired  = useRef([false, false]);
+  const handleActive = useCallback((index: number) => setActiveIndex(index), []);
 
-  // ── metrics ────────────────────────────────────────────────────────────────
-  const computeMetrics = () => {
-    const tl = timelineRef.current;
-    if (!tl) return;
-    timelineHRef.current = tl.offsetHeight;
-    const tlTop = tl.getBoundingClientRect().top + window.scrollY;
-
-    featRefs.forEach((ref, i) => {
-      const el = fmsRefs[i].current ?? ref.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      featTrigYs.current[i] = r.top + window.scrollY - tlTop + r.height / 2;
+  const toggle = useCallback((id: string) => {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
-    srowRefs.forEach((ref, i) => {
-      const el = smsRefs[i].current ?? ref.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      srowTrigYs.current[i] = r.top + window.scrollY - tlTop + r.height / 2;
-    });
+  }, []);
+
+  const allOpen = openIds.size === experiences.length;
+  const toggleAll = () =>
+    setOpenIds(allOpen ? new Set() : new Set(experiences.map((e) => e.id)));
+
+  const jumpToYear = (year: string) => {
+    const index = experiences.findIndex((e) => e.year === year);
+    rowEls.current[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
-  useEffect(() => {
-    const el = timelineRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => computeMetrics());
-    ro.observe(el);
-    return () => ro.disconnect();
-  });
+  const activeYear = experiences[activeIndex]?.year ?? YEARS[0];
 
-  useEffect(() => {
-    const t = setTimeout(computeMetrics, 300);
-    window.addEventListener("resize", computeMetrics);
-    return () => { clearTimeout(t); window.removeEventListener("resize", computeMetrics); };
-  });
+  const yearCounts = useMemo(
+    () =>
+      YEARS.map((y) => ({
+        year: y,
+        count: experiences.filter((e) => e.year === y).length,
+      })),
+    []
+  );
 
-  // ── scroll ─────────────────────────────────────────────────────────────────
+  // rel emas mengisi seiring scroll
   const { scrollYProgress } = useScroll({
-    target: timelineRef,
-    offset: ["start center", "end center"],
+    target: listRef,
+    offset: ["start 62%", "end 55%"],
   });
-  const smooth  = useSpring(scrollYProgress, { stiffness: 78, damping: 21, restDelta: 0.001 });
-  const dotYMV  = useMotionValue(LINE_PAD);
-  const filledH = useTransform(dotYMV, v => Math.max(0, v - LINE_PAD));
+  const railFill = useSpring(scrollYProgress, { stiffness: 90, damping: 24, restDelta: 0.001 });
 
-  useMotionValueEvent(smooth, "change", () => {
-    if (window.innerWidth < 768) return;
-    const tl = timelineRef.current;
-    if (!tl) return;
-
-    const h = timelineHRef.current;
-    const rect = tl.getBoundingClientRect();
-    const viewportAnchor = window.innerHeight * 0.5;
-    const dot = Math.max(
-      LINE_PAD,
-      Math.min(h - LINE_PAD, viewportAnchor - rect.top)
-    );
-    dotYMV.set(dot);
-
-    featRefs.forEach((ref, i) => {
-      const dist = Math.abs(dot - featTrigYs.current[i]);
-      const prox = Math.max(0, 1 - dist / PROX_FEAT);
-      const el   = ref.current;
-      const msEl = fmsRefs[i].current;
-      const scEl = scanRefs[i].current;
-
-      if (el)   gsap.to(el,   { opacity: 0.38 + prox * 0.62, duration: 0.55, ease: "power2.out", overwrite: "auto" });
-      if (msEl) gsap.to(msEl, { scale: 1 + prox * 1.2, opacity: 0.18 + prox * 0.82, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-
-      if (scEl && prox > 0.85 && !scanFired.current[i]) {
-        scanFired.current[i] = true;
-        gsap.fromTo(scEl,
-          { scaleX: 0, opacity: 0.8, transformOrigin: "left" },
-          { scaleX: 1, opacity: 0, duration: 0.8, ease: "power2.inOut" }
-        );
-      }
-      if (prox < 0.4) scanFired.current[i] = false;
-    });
-
-    srowRefs.forEach((ref, i) => {
-      const dist = Math.abs(dot - srowTrigYs.current[i]);
-      const prox = Math.max(0, 1 - dist / PROX_ROW);
-      const el   = ref.current;
-      const msEl = smsRefs[i].current;
-
-      if (el)   gsap.to(el,   { x: prox * MAX_ROW_SHIFT, opacity: 0.32 + prox * 0.68, duration: 0.5, ease: "power2.out", overwrite: "auto" });
-      if (msEl) gsap.to(msEl, { scale: 1 + prox * 0.8, opacity: 0.18 + prox * 0.82, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-    });
+  // parallax latar
+  const { scrollYProgress: secProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
   });
+  const bgY = useTransform(secProgress, [0, 1], [-70, 70]);
+  const topRule = useTransform(secProgress, [0.04, 0.26], [0, 1]);
 
-  // ── comet flash ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const comet = dotRef.current?.querySelector<HTMLElement>(".exp-comet");
-    if (!comet) return;
-    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.6 });
-    tl.fromTo(comet,
-      { scaleY: 0, opacity: 0.9, transformOrigin: "bottom" },
-      { scaleY: 1, opacity: 0,   duration: 0.55, ease: "power2.out" }
-    );
-    return () => { tl.kill(); };
-  }, []);
-
-  // Mobile: bypass GSAP opacity — show cards fully visible
-  useEffect(() => {
-    if (window.innerWidth >= 768) return;
-    [...featRefs, ...srowRefs].forEach(r => {
-      if (r.current) r.current.style.opacity = "1";
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── section bg parallax ────────────────────────────────────────────────────
-  const { scrollYProgress: secProg } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const bgY     = useTransform(secProg, [0, 1], [-60, 60]);
-  const bgRot   = useTransform(secProg, [0, 1], [-2, 2]);
-  const ruleScX = useTransform(secProg, [0.05, 0.28], [0, 1]);
-
-  // ── render ─────────────────────────────────────────────────────────────────
   return (
     <section
       ref={sectionRef}
@@ -323,374 +356,257 @@ export default function ExperienceSection() {
       className="relative z-30 overflow-hidden bg-[#0f0c09] px-5 py-24 md:px-8 lg:py-32"
       style={{ boxShadow: "0 -16px 64px rgba(0,0,0,0.45)", borderRadius: "28px 28px 0 0" }}
     >
-      {/* bg aksara */}
+      {/* Glyph ini dulunya 52vw dan ikut dirotasi tiap frame — layer sebesar itu
+          harus di-raster ulang terus-menerus saat scroll. Sekarang lebih kecil
+          dan murni translate. */}
       <motion.p
         className="pointer-events-none absolute -right-12 top-4 select-none font-black leading-none text-[#d6a44b]"
-        style={{ y: bgY, rotate: bgRot, fontSize: "52vw", opacity: 0.01 }}
+        style={{ y: bgY, fontSize: "38vw", opacity: 0.014 }}
         aria-hidden
       >
         ꦱ
       </motion.p>
 
-      {/* top rule */}
       <motion.div
+        aria-hidden
         className="pointer-events-none absolute left-0 top-0 h-px w-full origin-left bg-[#d6a44b]/40"
-        style={{ scaleX: ruleScX }}
+        style={{ scaleX: topRule }}
       />
 
-      {/* grid bg */}
       <div
+        aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.022]"
         style={{
-          backgroundImage: "linear-gradient(#d6a44b 1px, transparent 1px), linear-gradient(90deg, #d6a44b 1px, transparent 1px)",
+          backgroundImage:
+            "linear-gradient(#d6a44b 1px, transparent 1px), linear-gradient(90deg, #d6a44b 1px, transparent 1px)",
           backgroundSize: "64px 64px",
         }}
       />
 
       <div className="relative mx-auto max-w-7xl">
-
-        {/* ── HEADER ──────────────────────────────────────────────────────── */}
-        <motion.div
-          className="mb-12 grid gap-8 lg:grid-cols-[0.55fr_1fr]"
-          initial={{ opacity: 0, y: 34 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-12%" }}
-          transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-        >
+        {/* ── HEADER ─────────────────────────────────────────────────────── */}
+        <div className="mb-12 grid gap-9 lg:grid-cols-[0.9fr_1fr] lg:items-end">
           <div>
-            <p className="flex items-center gap-2.5 text-[8.5px] font-black uppercase tracking-[0.28em] text-[#d6a44b]">
+            <motion.p
+              className="flex items-center gap-2.5 text-[9px] font-black uppercase tracking-[0.28em] text-[#d6a44b]"
+              initial={{ opacity: 0, x: -16 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.6, ease: EASE }}
+            >
               <span className="h-px w-5 bg-[#d6a44b]/60" />
               05 · Pengalaman
-            </p>
-            <h2
-              className="mt-5 font-black leading-[0.9]"
-              style={{ fontSize: "clamp(2.4rem, 5.6vw, 6rem)" }}
-            >
-              Experience
+            </motion.p>
+
+            <h2 className="mt-5 font-black leading-[0.92]" style={{ fontSize: "clamp(2.4rem, 5.4vw, 5.4rem)" }}>
+              <Words text="Experience" />
               <br />
-              <span className="font-display italic text-[#d6a44b]">that matters.</span>
+              <Words
+                text="that matters."
+                className="font-display italic text-[#d6a44b]"
+                delay={0.1}
+              />
             </h2>
           </div>
-          <div className="flex flex-col justify-end gap-5">
-            <div className="flex gap-10">
-              {[["7", "Pengalaman"], ["2", "Spotlight"], ["2024–25", "Timeline"]].map(([n, l]) => (
-                <div key={l}>
-                  <p className="text-[2.2rem] font-black leading-none text-[#d6a44b]">{n}</p>
-                  <p className="mt-1 text-[8px] font-black uppercase tracking-[0.2em] text-[#6b5f4f] md:text-[#4b3f30]">{l}</p>
+
+          <div className="flex flex-col gap-6">
+            <motion.div
+              className="flex flex-wrap gap-8 sm:gap-10"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.7, delay: 0.12, ease: EASE }}
+            >
+              {[
+                { n: experiences.length, l: "Pengalaman", suffix: "" },
+                { n: SPOTLIGHT_IDS.length, l: "Spotlight", suffix: "" },
+                { n: YEARS.length, l: "Tahun Aktif", suffix: "" },
+                { n: ORG_COUNT, l: "Organisasi & Panitia", suffix: "" },
+              ].map((s) => (
+                <div key={s.l}>
+                  <p className="text-[2.1rem] font-black leading-none text-[#d6a44b] tabular-nums">
+                    <Counter to={s.n} suffix={s.suffix} />
+                  </p>
+                  <p className="mt-1 text-[8px] font-black uppercase tracking-[0.2em] text-[#8d8170]">
+                    {s.l}
+                  </p>
                 </div>
               ))}
-            </div>
-            <p className="max-w-2xl text-sm font-medium leading-[1.9] text-[#8d8170]">
-              Dua pengalaman utama sebagai spotlight: membangun web PT Esize dan mendampingi kelas Data Structure. Lima pengalaman organisasi mendukung profil leadership, komunikasi, dan teamwork.
-            </p>
-          </div>
-        </motion.div>
+            </motion.div>
 
-        {/* ── MARQUEE ─────────────────────────────────────────────────────── */}
-        <div className="mb-16 overflow-hidden border-y border-[#f7efe0]/6 py-4">
-          <div className="marquee-track flex items-center">
-            {[...MARQUEE_ROLES, ...MARQUEE_ROLES].map((item, i) => (
+            <motion.p
+              className="max-w-2xl text-sm font-medium leading-[1.9] text-[#a2937d]"
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
+            >
+              Dua pengalaman teknis jadi spotlight — membangun katalog produk eSize dan mengajar
+              Data Structures &amp; Algorithms. Sisanya membangun sisi leadership, komunikasi, dan
+              kerja tim. Ketuk tiap baris untuk membuka rinciannya.
+            </motion.p>
+          </div>
+        </div>
+
+        {/* ── MARQUEE ────────────────────────────────────────────────────── */}
+        <div className="mb-12 overflow-hidden border-y border-[#f7efe0]/8 py-4">
+          <div className="marquee-track-reverse flex w-max items-center">
+            {[...experienceRoles, ...experienceRoles].map((role, i) => (
               <span
                 key={i}
-                className="mx-12 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#8d8170] md:text-[#3b3028]"
+                className="mx-10 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.26em] text-[#8d8170]"
               >
-                <span className="mr-4 text-[#d6a44b]/40">ꦱ</span>
-                {item}
+                <span className="mr-4 text-[#d6a44b]/70">ꦱ</span>
+                {role}
               </span>
             ))}
           </div>
         </div>
 
-        {/* ── TIMELINE AREA ───────────────────────────────────────────────── */}
-        <div ref={timelineRef} className="relative">
+        {/* ── BODY ───────────────────────────────────────────────────────── */}
+        <div className="lg:grid lg:grid-cols-[13.5rem_1fr] lg:gap-14">
+          {/* ── panel kiri: tahun yang sedang dibaca ── */}
+          <aside className="mb-8 lg:mb-0">
+            <div className="lg:sticky lg:top-28">
+              <p className="text-[8px] font-black uppercase tracking-[0.26em] text-[#6b5f4f]">
+                Sedang dibaca
+              </p>
 
-          {/* left vertical line + dot — desktop only ──────────────────────── */}
-          <div className="pointer-events-none absolute inset-y-0 hidden lg:block" style={{ left: 0, width: 0 }} aria-hidden>
+              <div className="relative mt-2 h-[3.4rem] overflow-hidden lg:h-[5rem]">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.p
+                    key={activeYear}
+                    className="absolute inset-0 font-black leading-none text-[#d6a44b] tabular-nums"
+                    style={{ fontSize: "clamp(2.8rem, 5vw, 4.4rem)" }}
+                    initial={{ y: "72%", opacity: 0, filter: "blur(9px)" }}
+                    animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
+                    exit={{ y: "-72%", opacity: 0, filter: "blur(9px)" }}
+                    transition={{ duration: 0.5, ease: EASE }}
+                  >
+                    {activeYear}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
 
-            {/* track */}
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-xs font-black tabular-nums text-[#c9b99d]">
+                  {String(activeIndex + 1).padStart(2, "0")}
+                </span>
+                <div className="h-px flex-1 bg-[#f7efe0]/12">
+                  <motion.div
+                    className="h-px bg-[#d6a44b]"
+                    animate={{
+                      scaleX: (activeIndex + 1) / experiences.length,
+                    }}
+                    style={{ transformOrigin: "left" }}
+                    transition={{ duration: 0.45, ease: EASE }}
+                  />
+                </div>
+                <span className="text-xs font-black tabular-nums text-[#6b5f4f]">
+                  {String(experiences.length).padStart(2, "0")}
+                </span>
+              </div>
+
+              <div className="mt-7 flex gap-2 lg:flex-col lg:gap-1.5">
+                {yearCounts.map(({ year, count }) => {
+                  const isActive = year === activeYear;
+                  return (
+                    <button
+                      key={year}
+                      type="button"
+                      onClick={() => jumpToYear(year)}
+                      className="group relative flex flex-1 items-center justify-between gap-3 border px-3 py-2 text-left outline-none transition-colors duration-300 focus-visible:ring-1 focus-visible:ring-[#d6a44b]"
+                      style={{
+                        borderColor: isActive ? "#d6a44b4d" : "rgba(247,239,224,0.08)",
+                        background: isActive ? "#d6a44b0f" : "transparent",
+                      }}
+                    >
+                      <span
+                        className="text-[10px] font-black uppercase tracking-[0.18em] transition-colors"
+                        style={{ color: isActive ? "#d6a44b" : "#8d8170" }}
+                      >
+                        {year}
+                      </span>
+                      <span className="text-[9px] font-black tabular-nums text-[#6b5f4f]">
+                        {String(count).padStart(2, "0")}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleAll}
+                className="mt-4 w-full border border-[#f7efe0]/10 px-3 py-2.5 text-[9px] font-black uppercase tracking-[0.2em] text-[#8d8170] outline-none transition-colors duration-300 hover:border-[#d6a44b]/45 hover:text-[#d6a44b] focus-visible:ring-1 focus-visible:ring-[#d6a44b]"
+              >
+                {allOpen ? "Tutup semua" : "Buka semua"}
+              </button>
+
+              <p className="mt-4 hidden text-[9px] font-medium leading-[1.8] text-[#6b5f4f] lg:block">
+                Ketuk kartu untuk membuka rincian, atau pilih tahun untuk melompat.
+              </p>
+            </div>
+          </aside>
+
+          {/* ── daftar pengalaman ── */}
+          <div ref={listRef} className="relative">
+            {/* rel */}
             <div
-              className="absolute w-px"
-              style={{ left: 24, top: LINE_PAD, bottom: LINE_PAD, background: "#1e1a16", transform: "translateX(-50%)" }}
+              aria-hidden
+              className="absolute left-[0.875rem] top-3 bottom-16 w-px -translate-x-1/2 bg-[#231d17] lg:left-[1.25rem]"
             />
-
-            {/* gold filled */}
             <motion.div
-              className="absolute w-px origin-top"
+              aria-hidden
+              className="absolute left-[0.875rem] top-3 bottom-16 w-px -translate-x-1/2 origin-top lg:left-[1.25rem]"
               style={{
-                left: 24,
-                top: LINE_PAD,
-                height: filledH,
-                background: "linear-gradient(to bottom, #d6a44b, #d6a44b44)",
-                transform: "translateX(-50%)",
+                scaleY: railFill,
+                background: "linear-gradient(to bottom, #d6a44b, #a73522)",
               }}
             />
 
-            {/* glowing dot */}
-            <motion.div
-              ref={dotRef}
-              className="absolute"
-              style={{ left: 24, top: dotYMV, marginTop: -5 }}
-            >
-              <div
-                className="exp-comet absolute left-1/2 w-px -translate-x-1/2"
-                style={{ bottom: "50%", height: 48, background: "linear-gradient(to top, #d6a44b, transparent)", transformOrigin: "bottom" }}
-              />
-              <motion.div
-                className="absolute rounded-full bg-[#d6a44b]"
-                style={{ width: 22, height: 22, left: -11, top: -11 }}
-                animate={{ scale: [1, 2.6, 3.4], opacity: [0.5, 0.12, 0] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
-              />
-              <motion.div
-                className="absolute rounded-full bg-[#d6a44b]"
-                style={{ width: 14, height: 14, left: -7, top: -7 }}
-                animate={{ scale: [1, 1.9, 2.5], opacity: [0.4, 0.1, 0] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut", delay: 0.38 }}
-              />
-              <div
-                className="relative rounded-full bg-[#d6a44b]"
-                style={{ width: 8, height: 8, marginLeft: -4, marginTop: -4, boxShadow: "0 0 16px 6px #d6a44b80, 0 0 5px 1px #d6a44b" }}
-              />
-              <div
-                className="absolute rounded-full bg-[#fff7ea]"
-                style={{ width: 3, height: 3, left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}
-              />
-            </motion.div>
-          </div>
-
-          {/* ── FEATURED CARDS ──────────────────────────────────────────────── */}
-          <div className="mb-14 space-y-5">
-            {FEATURED.map((exp, index) => (
-              <div
+            {experiences.map((exp, i) => (
+              <ExperienceRow
                 key={exp.id}
-                className="lg:grid lg:grid-cols-[48px_1fr] lg:items-center"
-              >
-                {/* milestone dot */}
-                <div className="hidden items-center justify-center lg:flex">
-                  <div ref={[fms0, fms1][index]} style={{ opacity: 0.18 }}>
-                    <div
-                      className="h-3 w-3 rounded-full"
-                      style={{ background: exp.accent, boxShadow: `0 0 10px 4px ${exp.accent}55` }}
-                    />
-                  </div>
-                </div>
-
-                {/* wrapper — GSAP drives opacity */}
-                <div ref={[feat0, feat1][index]} style={{ opacity: 0.38 }}>
-                  <motion.article
-                    className="relative overflow-hidden border"
-                    style={{ borderColor: exp.accent + "28", background: "#100d0a" }}
-                    whileHover={{ y: -4, transition: { duration: 0.22 } }}
-                  >
-                    {/* GSAP scan line */}
-                    <div
-                      ref={[scan0, scan1][index]}
-                      className="pointer-events-none absolute inset-x-0 h-px"
-                      style={{
-                        top: "50%",
-                        background: `linear-gradient(to right, transparent 0%, ${exp.accent} 50%, transparent 100%)`,
-                        transformOrigin: "left",
-                        transform: "scaleX(0)",
-                        opacity: 0,
-                      }}
-                    />
-
-                    {/* top accent bar */}
-                    <div
-                      className="absolute left-0 top-0 h-[2px] w-full"
-                      style={{ background: `linear-gradient(to right, ${exp.accent}, transparent 60%)` }}
-                    />
-
-                    {/* grid paper bg */}
-                    <div
-                      className="pointer-events-none absolute inset-0 opacity-[0.028]"
-                      style={{
-                        backgroundImage: `linear-gradient(${exp.accent} 1px, transparent 1px), linear-gradient(90deg, ${exp.accent} 1px, transparent 1px)`,
-                        backgroundSize: "28px 28px",
-                      }}
-                    />
-
-                    <div className="grid lg:grid-cols-[0.42fr_0.58fr]">
-
-                      {/* LEFT — giant role typography */}
-                      <div className="relative flex flex-col justify-end overflow-hidden p-8 lg:min-h-[400px] lg:p-10">
-                        <motion.p
-                          className="pointer-events-none absolute -left-4 bottom-0 select-none font-black leading-none"
-                          style={{ color: exp.accent, fontSize: "clamp(11rem, 20vw, 18rem)", opacity: 0.046 }}
-                          animate={{ y: [0, -12, 0], rotate: [0, -1.2, 0] }}
-                          transition={{ duration: 8 + index * 1.5, repeat: Infinity, ease: "easeInOut" }}
-                          aria-hidden
-                        >
-                          {exp.aksara}
-                        </motion.p>
-
-                        <div className="relative">
-                          <p
-                            className="mb-4 text-[8px] font-black uppercase tracking-[0.28em]"
-                            style={{ color: exp.accent + "80" }}
-                          >
-                            Spotlight · {exp.id}
-                          </p>
-                          {exp.roleLines.map((line, i) => (
-                            <p
-                              key={line}
-                              className="font-black uppercase leading-[0.88]"
-                              style={{
-                                color: i === 0 ? exp.accent : "#fff7ea",
-                                fontSize: "clamp(1.9rem, 3vw, 3.2rem)",
-                              }}
-                            >
-                              {line}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* RIGHT — details */}
-                      <div
-                        className="flex flex-col justify-between border-t p-8 lg:border-l lg:border-t-0 lg:p-10"
-                        style={{ borderColor: exp.accent + "14" }}
-                      >
-                        <div>
-                          <div className="mb-4 flex items-start justify-between gap-4">
-                            <p className="max-w-[42ch] text-[0.65rem] font-black uppercase tracking-[0.12em] text-[#8d8170] md:text-[#6f6251]">
-                              {exp.company}
-                            </p>
-                            <p
-                              className="shrink-0 text-[8px] font-black uppercase tracking-[0.2em]"
-                              style={{ color: exp.accent + "66" }}
-                            >
-                              {exp.period}
-                            </p>
-                          </div>
-                          <div className="mb-5 h-px bg-[#f7efe0]/8" />
-                          <p className="text-sm font-medium leading-[1.85] text-[#8d8170]">{exp.desc}</p>
-                        </div>
-
-                        <div className="mt-6 space-y-4">
-                          <ul className="grid gap-2.5">
-                            {exp.wins.map(win => (
-                              <li key={win} className="flex gap-3 text-xs font-semibold leading-relaxed text-[#b4a68f]">
-                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0" style={{ background: exp.accent }} />
-                                <span>{win}</span>
-                              </li>
-                            ))}
-                          </ul>
-                          <Tags exp={exp} />
-                        </div>
-                      </div>
-                    </div>
-                  </motion.article>
-                </div>
-              </div>
+                exp={exp}
+                index={i}
+                isOpen={openIds.has(exp.id)}
+                onToggle={toggle}
+                onActive={handleActive}
+                registerRef={registerRef}
+              />
             ))}
-          </div>
 
-          {/* ── DIVIDER ─────────────────────────────────────────────────────── */}
-          <motion.div
-            className="mb-8 flex items-center gap-5 lg:pl-[48px]"
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-8%" }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="grid h-8 w-8 place-items-center border border-[#d6a44b]/20 bg-[#d6a44b]/[0.08] text-sm font-black text-[#d6a44b]">
-              ꦏ
+            {/* ── ujung timeline ── */}
+            <div className="grid grid-cols-[1.75rem_1fr] gap-x-3 lg:grid-cols-[2.5rem_1fr] lg:gap-x-5">
+              <div className="relative flex justify-center pt-2">
+                <span className="relative flex h-3.5 w-3.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#d6a44b] opacity-50" />
+                  <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-[#d6a44b]" />
+                </span>
+              </div>
+              <motion.div
+                className="pt-0.5"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ duration: 0.6, ease: EASE }}
+              >
+                <p className="text-base font-black text-[#fff7ea]">Sekarang</p>
+                <p className="mt-1.5 max-w-[46ch] text-[13px] font-medium leading-[1.8] text-[#a2937d]">
+                  Terbuka untuk peran frontend berikutnya — magang, freelance, atau kolaborasi
+                  produk.
+                </p>
+                <a
+                  href="mailto:faisalakmal2105@gmail.com"
+                  className="btn-shimmer mt-4 inline-flex items-center gap-2 border border-[#d6a44b]/40 bg-[#d6a44b]/[0.08] px-5 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-[#d6a44b] hover:border-[#d6a44b]"
+                >
+                  Ajak kerja sama <span aria-hidden>→</span>
+                </a>
+              </motion.div>
             </div>
-            <p className="shrink-0 text-sm font-black text-[#fff7ea]">Leadership & Organization</p>
-            <div className="h-px flex-1 bg-[#f7efe0]/10" />
-            <p className="hidden text-[7px] font-black uppercase tracking-[0.22em] text-[#6b5f4f] md:text-[#4b3f30] sm:block">
-              {SUPPORTING.length} entries
-            </p>
-          </motion.div>
-
-          {/* ── SUPPORTING ROWS ─────────────────────────────────────────────── */}
-          <div>
-            {SUPPORTING.map((exp, index) => (
-              <div
-                key={exp.id}
-                className="lg:grid lg:grid-cols-[48px_1fr] lg:items-start"
-              >
-                {/* milestone dot */}
-                <div className="hidden items-start justify-center pt-[22px] lg:flex">
-                  <div ref={[sms0, sms1, sms2, sms3, sms4][index]} style={{ opacity: 0.18 }}>
-                    <div
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ background: exp.accent, boxShadow: `0 0 8px 3px ${exp.accent}44` }}
-                    />
-                  </div>
-                </div>
-
-                {/* row wrapper — GSAP drives opacity + x */}
-                <div ref={[srow0, srow1, srow2, srow3, srow4][index]} style={{ opacity: 0.32 }}>
-                  <motion.article
-                    className="group relative border-b border-[#f7efe0]/[0.06]"
-                    whileHover={{ backgroundColor: exp.accent + "08" }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {/* left accent bar on hover */}
-                    <div
-                      className="absolute left-0 top-0 h-full w-[2px] origin-top scale-y-0 transition-transform duration-300 group-hover:scale-y-100"
-                      style={{ background: `linear-gradient(to bottom, ${exp.accent}, transparent)` }}
-                    />
-
-                    <div className="flex items-start gap-5 px-5 py-5">
-                      {/* aksara decoration */}
-                      <span
-                        className="hidden shrink-0 font-black sm:block"
-                        style={{ color: exp.accent + "1e", fontSize: "2.2rem", lineHeight: 1 }}
-                        aria-hidden
-                      >
-                        {exp.aksara}
-                      </span>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-baseline gap-2">
-                          <span
-                            className="text-[7px] font-black uppercase tracking-[0.22em]"
-                            style={{ color: exp.accent + "50" }}
-                          >
-                            {exp.id}
-                          </span>
-                          <h3 className="text-base font-black uppercase leading-tight text-[#fff7ea]">
-                            {exp.roleLines.join(" ")}
-                          </h3>
-                        </div>
-                        <p className="mt-0.5 text-[0.63rem] font-black uppercase tracking-[0.1em] text-[#6b5f4f] md:text-[#4b3f30]">
-                          {exp.company}
-                        </p>
-                        <p className="mt-2 max-w-[68ch] text-[0.72rem] font-medium leading-[1.75] text-[#8d8170] md:text-[#5a4f40]">
-                          {exp.desc}
-                        </p>
-                      </div>
-
-                      <div className="flex shrink-0 flex-col items-end gap-2.5">
-                        <span
-                          className="border px-2.5 py-1 text-[7px] font-black uppercase tracking-[0.16em]"
-                          style={{ borderColor: exp.accent + "20", color: exp.accent + "70" }}
-                        >
-                          {exp.period.includes("—") ? exp.period.split("—")[0].trim() : exp.year}
-                        </span>
-                        <div className="hidden flex-wrap justify-end gap-1 sm:flex">
-                          {exp.tags.slice(0, 2).map(tag => (
-                            <span
-                              key={tag}
-                              className="border bg-[#f7efe0]/[0.02] px-2 py-0.5 text-[6px] font-black uppercase tracking-[0.12em]"
-                              style={{ borderColor: exp.accent + "18", color: exp.accent + "58" }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.article>
-                </div>
-              </div>
-            ))}
           </div>
-
-        </div>{/* /timeline */}
+        </div>
       </div>
     </section>
   );
