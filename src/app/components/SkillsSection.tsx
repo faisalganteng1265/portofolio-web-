@@ -70,12 +70,23 @@ export default function SkillsSection() {
     const orbitStageEl = orbitStageRef.current;
     const nextEl = el.nextElementSibling as HTMLElement | null;
 
-    const onScroll = () => {
+    // Handler ini ikut jalan di sepanjang halaman. Tanpa penjaga di bawah, tiap
+    // event scroll melakukan baca layout + tulis style ke tiga elemen sekaligus
+    // (layout thrashing) padahal 90% waktu progress-nya mentok di 0 atau 1.
+    let rafId = 0;
+    let lastProgress = -1;
+
+    const apply = () => {
+      rafId = 0;
       const next = nextEl;
       if (!next) return;
       const vh = window.innerHeight;
       const rect = next.getBoundingClientRect();
       const progress = Math.max(0, Math.min(1, (vh - rect.top) / vh));
+
+      // Nilai identik → tidak ada yang perlu ditulis ulang.
+      if (Math.abs(progress - lastProgress) < 0.0005) return;
+      lastProgress = progress;
 
       el.style.clipPath = progress > 0 ? `inset(0 ${(progress * 100).toFixed(2)}% 0 0)` : "";
       el.style.pointerEvents = progress >= 1 ? "none" : "";
@@ -95,10 +106,19 @@ export default function SkillsSection() {
       }
     };
 
+    // Beberapa event scroll dalam satu frame dipadatkan jadi satu pembacaan.
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(apply);
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    window.addEventListener("resize", onScroll, { passive: true });
+    apply();
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       if (nextEl) nextEl.style.transform = "";
       el.style.clipPath = "";
       if (orbitStageEl) {
