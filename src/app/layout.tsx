@@ -20,9 +20,9 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Abiyyu Faisal Akmal · Frontend Developer",
+  title: "Abiyyu Faisal Akmal ",
   description:
-    "Portfolio pribadi Abiyyu Faisal Akmal — Frontend Developer Indonesia. Membangun web yang cepat, bersih, dan berkarakter dengan sentuhan visual Jawa.",
+    "Portfolio pribadi Abiyyu Faisal Akmal",
 };
 
 export default function RootLayout({

@@ -25,7 +25,7 @@ const TILT_SPRING = { stiffness: 210, damping: 20, mass: 0.5 };
 
 const MARQUEE_ITEMS = [
   "Juara 1 · Web Design Competition UTI",
-  "Top 50 Global · Base Build Hackathon",
+  "Winner · Base Build Hackathon Global",
   "Juara 3 · Hackathon Base Indonesia",
   "Most Favorite · Lisk Builder Program 2",
   "Batch 2 · Base Indonesia Workshop",
@@ -34,6 +34,17 @@ const MARQUEE_ITEMS = [
 
 // ── medali peringkat ─────────────────────────────────────────────────────────
 function Medal({ item, compact }: { item: Achievement; compact?: boolean }) {
+  // "1" / "3" / "50" muat besar; kata utuh seperti "Winner" perlu diturunkan
+  // supaya medali tidak mendesak chip tahun di sebelahnya pada layar sempit.
+  const isWord = item.rankMain.length > 3;
+  const mainSize = compact
+    ? isWord
+      ? "clamp(1.35rem, 2.5vw, 1.85rem)"
+      : "clamp(1.9rem, 3.4vw, 2.6rem)"
+    : isWord
+      ? "clamp(1.8rem, 3.4vw, 3rem)"
+      : "clamp(2.4rem, 4.6vw, 3.8rem)";
+
   return (
     <div
       className="medal relative overflow-hidden px-4 pb-3 pt-2.5"
@@ -52,8 +63,8 @@ function Medal({ item, compact }: { item: Achievement; compact?: boolean }) {
         {item.rankTop}
       </span>
       <span
-        className="relative block font-black leading-[0.82] text-[#fff7ea]"
-        style={{ fontSize: compact ? "clamp(1.9rem, 3.4vw, 2.6rem)" : "clamp(2.4rem, 4.6vw, 3.8rem)" }}
+        className="relative block whitespace-nowrap font-black leading-[0.82] text-[#fff7ea]"
+        style={{ fontSize: mainSize }}
       >
         {item.rankMain}
       </span>
