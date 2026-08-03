@@ -52,6 +52,7 @@ export default function AboutLanyard({
 }: LanyardProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [dropKey, setDropKey] = useState(0);
+  const [inView, setInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,9 +75,24 @@ export default function AboutLanyard({
     return () => observer.disconnect();
   }, []);
 
+  // Render loop + physics hanya jalan saat kanvas benar-benar terlihat.
+  // Tanpa ini three.js + Rapier menyala 60fps sepanjang umur halaman dan
+  // membuat scroll di seluruh section lain terasa berat.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "200px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div ref={containerRef} className="absolute inset-0 z-20">
       <Canvas
+        frameloop={inView ? "always" : "never"}
         camera={{ position, fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
         gl={{ alpha: true, antialias: true }}
